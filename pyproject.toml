@@ -1,0 +1,19 @@
+[project]
+name = "graph-theory-book"
+version = "0.1.0"
+description = "Runnable code and theorem checks for the book 'Graph Theory: From First Definitions to Research'"
+requires-python = ">=3.11"
+dependencies = []
+
+# There are none, and that is a design decision. Every algorithm in this book is
+# one you can read, including the eigenvalue solver in Chapter 29. Nothing here
+# calls the network or a model; the whole book verifies offline and for free.
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["graphs"]
