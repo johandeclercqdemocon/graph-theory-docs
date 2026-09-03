@@ -62,6 +62,24 @@ def distances(g: Graph, source: int) -> dict[int, int]:
     return dist
 
 
+def walk_counts(g: Graph, k: int) -> list[list[int]]:
+    """`out[u][v]` is the number of walks of length exactly k from u to v.
+
+    This is the k-th power of the adjacency matrix, and Chapter 4 proves why by
+    induction. Written as plain matrix multiplication because that is the proof;
+    Chapter 29 is where the same matrix starts being used for its eigenvalues.
+    """
+    n = g.n
+    a = [[1 if g.has_edge(u, v) else 0 for v in range(n)] for u in range(n)]
+    result = [[1 if u == v else 0 for v in range(n)] for u in range(n)]
+    for _ in range(k):
+        result = [
+            [sum(result[u][t] * a[t][v] for t in range(n)) for v in range(n)]
+            for u in range(n)
+        ]
+    return result
+
+
 # --- connectivity -----------------------------------------------------------
 
 

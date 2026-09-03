@@ -35,20 +35,7 @@ def all_labelled_graphs(n: int) -> Iterator[Graph]:
         yield Graph(n, (p for i, p in enumerate(pairs) if mask >> i & 1))
 
 
-def canonical(g: Graph) -> tuple:
-    """A label-independent fingerprint: the lexicographically smallest edge set.
-
-    Two graphs are isomorphic exactly when their canonical forms are equal.
-    Correct, obvious, and O(n! * m) -- see the module docstring.
-    """
-    best: tuple | None = None
-    for perm in itertools.permutations(range(g.n)):
-        edges = tuple(sorted(
-            (min(perm[u], perm[v]), max(perm[u], perm[v])) for u, v in g.edges()
-        ))
-        if best is None or edges < best:
-            best = edges
-    return (g.n, best or ())
+from .iso import canonical  # re-exported: it is the tool this module is built on
 
 
 def all_graphs_up_to_iso(n: int) -> list[Graph]:
@@ -114,3 +101,26 @@ def path(n: int) -> Graph:
     from .core import path as _path
 
     return _path(n)
+
+
+def witnesses() -> list[Graph]:
+    """The specific graphs this book argues about.
+
+    Exhaustive families stop at n = 5 or 6 for cost reasons, and several of the
+    interesting counterexamples are larger than that -- the Petersen graph is on
+    ten vertices and refutes half of Part IV. A claim whose witness lives here
+    would otherwise never be checked, and the harness would report it VACUOUS
+    rather than quietly passing it.
+    """
+    from .core import complete, complete_bipartite, cycle, path as _path, petersen
+
+    graphs = [
+        _path(1), _path(2), _path(5),
+        cycle(3), cycle(4), cycle(5), cycle(6), cycle(7),
+        complete(1), complete(4), complete(5),
+        complete_bipartite(2, 3), complete_bipartite(3, 3),
+        petersen(),
+        Graph(6, [(0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3)]),  # two triangles
+        Graph(0),
+    ]
+    return graphs

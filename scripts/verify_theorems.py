@@ -23,12 +23,14 @@ sys.path.insert(0, str(ROOT))
 
 from graphs.claims import CLAIMS_EXPECTED_TO_FAIL, REGISTRY  # noqa: E402
 from graphs.core import Graph  # noqa: E402
-from graphs.generate import random_graphs, small_graphs  # noqa: E402
+from graphs.generate import random_graphs, small_graphs, witnesses  # noqa: E402
 
 
 def family(name: str, max_n: int) -> list[Graph]:
     if name == "small":
         return list(small_graphs(max_n))
+    if name == "witnesses":
+        return witnesses()
     if name == "random":
         return list(random_graphs(200, (1, 14), seed=11))
     raise ValueError(f"unknown family {name!r}")

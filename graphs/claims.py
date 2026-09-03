@@ -123,6 +123,36 @@ def complement_degrees(g: Graph) -> bool:
     return all(g.degree(v) + c.degree(v) == g.n - 1 for v in g.vertices())
 
 
+@theorem("Havel-Hakimi agrees with brute-force realisability", chapter=3, family="small",
+         note="Checked against every graph on n vertices, not against Erdos-Gallai. "
+              "Two wrong algorithms can agree; an algorithm and an exhaustive "
+              "search cannot.")
+def havel_hakimi_is_correct(g: Graph) -> bool | None:
+    if g.n > 5:
+        return None
+    from .degree import is_graphical_bruteforce, is_graphical_havel_hakimi
+
+    seq = g.degree_sequence()
+    return is_graphical_havel_hakimi(seq) == is_graphical_bruteforce(seq)
+
+
+@theorem("Erdos-Gallai agrees with Havel-Hakimi", chapter=3)
+def erdos_gallai_agrees(g: Graph) -> bool:
+    from .degree import is_graphical_erdos_gallai, is_graphical_havel_hakimi
+
+    seq = g.degree_sequence()
+    return is_graphical_erdos_gallai(seq) == is_graphical_havel_hakimi(seq)
+
+
+@theorem("Havel-Hakimi's construction really has the requested degrees", chapter=3)
+def havel_hakimi_construction_is_right(g: Graph) -> bool:
+    from .degree import realise
+
+    seq = g.degree_sequence()
+    built = realise(seq)
+    return built is not None and built.degree_sequence() == seq
+
+
 # --- Chapter 4: connectivity ------------------------------------------------
 
 
@@ -154,6 +184,76 @@ def edge_removal_splits_at_most_once(g: Graph) -> bool:
         if after not in (before, before + 1):
             return False
     return True
+
+
+@theorem("The (u,v) entry of A^k counts walks of length k", chapter=4,
+         note="Checked against enumerating every length-k vertex sequence.")
+def walks_are_matrix_powers(g: Graph) -> bool | None:
+    if g.n > 5:
+        return None
+    counted = alg.walk_counts(g, 3)
+    for u in g.vertices():
+        for v in g.vertices():
+            by_hand = sum(
+                1
+                for mid in itertools.product(g.vertices(), repeat=2)
+                if g.has_edge(u, mid[0]) and g.has_edge(mid[0], mid[1]) and g.has_edge(mid[1], v)
+            )
+            if counted[u][v] != by_hand:
+                return False
+    return True
+
+
+@theorem("A vertex is in exactly one component", chapter=4)
+def bfs_and_components_agree(g: Graph) -> bool:
+    comps = alg.components(g)
+    return all(
+        sum(1 for c in comps if v in c) == 1 for v in g.vertices()
+    )
+
+
+# --- Chapter 5: isomorphism -------------------------------------------------
+
+
+@theorem("Isomorphic graphs have equal degree sequences", chapter=5)
+def iso_preserves_degree_sequence(g: Graph) -> bool:
+    import random as _random
+
+    from .iso import canonical as _canon
+
+    perm = list(g.vertices())
+    _random.Random(g.m * 31 + g.n).shuffle(perm)
+    relabelled = Graph(g.n, [(perm[u], perm[v]) for u, v in g.edges()])
+    return (
+        g.degree_sequence() == relabelled.degree_sequence()
+        and _canon(g) == _canon(relabelled)
+    )
+
+
+@theorem("Colour refinement never separates isomorphic graphs", chapter=5,
+         note="One-sided soundness. The other direction is false and has its own entry.")
+def wl_is_sound(g: Graph) -> bool:
+    import random as _random
+
+    from .iso import wl_signature
+
+    perm = list(g.vertices())
+    _random.Random(g.m * 17 + 3).shuffle(perm)
+    relabelled = Graph(g.n, [(perm[u], perm[v]) for u, v in g.edges()])
+    return wl_signature(g) == wl_signature(relabelled)
+
+
+@theorem("Equal degree sequences imply isomorphic", chapter=5, family="witnesses",
+         note="Must be refuted. C_6 and two disjoint triangles are both 2-regular "
+              "on six vertices and are not isomorphic, so no 2-regular graph on "
+              "six vertices can be isomorphic to both.")
+def equal_degrees_implies_iso_is_false(g: Graph) -> bool | None:
+    from .iso import canonical as _canon, cospectral_mates
+
+    if g.degree_sequence() != [2] * 6:
+        return None
+    a, b = cospectral_mates()
+    return _canon(g) == _canon(a) and _canon(g) == _canon(b)
 
 
 # --- Chapter 6: trees -------------------------------------------------------
@@ -252,4 +352,7 @@ def mantel(g: Graph) -> bool | None:
     return g.m <= g.n * g.n / 4
 
 
-CLAIMS_EXPECTED_TO_FAIL = {"Triangle-free does not imply bipartite"}
+CLAIMS_EXPECTED_TO_FAIL = {
+    "Triangle-free does not imply bipartite",
+    "Equal degree sequences imply isomorphic",
+}
