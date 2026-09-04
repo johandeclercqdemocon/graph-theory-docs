@@ -592,3 +592,107 @@ def test_fpt_branching_agrees_with_exhaustive_search() -> None:
         for k in range(g.n + 1):
             found = vertex_cover_at_most_k(g, k)
             assert (found is not None) == (k >= optimum)
+
+
+# --- Part VI: probabilistic, extremal, spectral -----------------------------
+
+
+def test_cut_is_at_least_half_the_edges() -> None:
+    from graphs.extremal import greedy_cut, max_cut_bruteforce
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        assert max_cut_bruteforce(g) >= g.m / 2
+        assert greedy_cut(g) >= g.m / 2          # the derandomisation must too
+
+
+def test_turan_matches_exhaustive_search() -> None:
+    from graphs.extremal import max_edges_without_clique, turan_bound, turan_graph
+
+    for n in range(2, 6):
+        for r in (2, 3):
+            assert max_edges_without_clique(n, r + 1) == turan_bound(n, r)
+            assert turan_graph(n, r).m == turan_bound(n, r)
+
+
+def test_ramsey_three_three_is_exactly_six() -> None:
+    from graphs.extremal import ramsey_counterexample, ramsey_holds
+    from graphs.iso import canonical
+
+    assert ramsey_holds(6, 3, 3)                     # 32768 colourings
+    witness = ramsey_counterexample(5, 3, 3)
+    assert witness is not None
+    # the witness is C_5, and its complement is also C_5
+    assert canonical(witness) == canonical(cycle(5))
+    assert canonical(witness.complement()) == canonical(cycle(5))
+
+
+def test_eigen_solver_against_trace_identities() -> None:
+    from graphs.generate import small_graphs
+    from graphs.spectral import adjacency_spectrum
+
+    for g in small_graphs(5):
+        sp = adjacency_spectrum(g)
+        triangles = sum(
+            1
+            for a, b, c in __import__("itertools").combinations(g.vertices(), 3)
+            if g.has_edge(a, b) and g.has_edge(b, c) and g.has_edge(a, c)
+        )
+        assert abs(sum(sp)) < 1e-8                              # trace(A) = 0
+        assert abs(sum(x * x for x in sp) - 2 * g.m) < 1e-8     # trace(A^2) = 2m
+        assert abs(sum(x ** 3 for x in sp) - 6 * triangles) < 1e-6
+
+
+def test_known_spectra() -> None:
+    from graphs.spectral import adjacency_spectrum
+
+    assert [round(x, 6) for x in adjacency_spectrum(complete(4))] == [-1.0, -1.0, -1.0, 3.0]
+    # Petersen: 3 once, 1 five times, -2 four times
+    assert [round(x, 6) for x in adjacency_spectrum(petersen())] == [-2.0] * 4 + [1.0] * 5 + [3.0]
+
+
+def test_cospectral_non_isomorphic_pair() -> None:
+    from graphs.spectral import adjacency_spectrum
+
+    star = Graph(5, [(0, 1), (0, 2), (0, 3), (0, 4)])
+    square_plus_point = Graph(5, [(0, 1), (1, 2), (2, 3), (3, 0)])
+    a = [round(x, 6) for x in adjacency_spectrum(star)]
+    b = [round(x, 6) for x in adjacency_spectrum(square_plus_point)]
+    assert a == b                                   # same spectrum
+    assert alg.is_connected(star) and not alg.is_connected(square_plus_point)
+
+
+def test_matrix_tree_retires_the_enumeration() -> None:
+    from graphs.mst import spanning_trees
+    from graphs.spectral import spanning_tree_count
+
+    for n in range(1, 7):
+        assert spanning_tree_count(complete(n)) == (1 if n <= 2 else n ** (n - 2))
+    for g in (cycle(5), path(5), petersen()):
+        if g.n <= 5:
+            assert spanning_tree_count(g) == len(spanning_trees(g))
+    assert spanning_tree_count(complete(10)) == 10 ** 8      # far beyond enumeration
+    assert spanning_tree_count(petersen()) == 2000
+
+
+def test_laplacian_zero_multiplicity_counts_components() -> None:
+    from graphs.spectral import algebraic_connectivity, laplacian_spectrum
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        zeros = sum(1 for x in laplacian_spectrum(g) if abs(x) < 1e-8)
+        assert zeros == len(alg.components(g))
+        if g.n >= 2:
+            assert (algebraic_connectivity(g) > 1e-8) == alg.is_connected(g)
+
+
+def test_cheeger_inequality_brackets_the_true_constant() -> None:
+    import math
+
+    from graphs.spectral import algebraic_connectivity, cheeger_constant
+
+    for g in (path(4), cycle(5), complete(4), petersen()):
+        l2 = algebraic_connectivity(g)
+        h = cheeger_constant(g)
+        delta = max(g.degree(v) for v in g.vertices())
+        assert l2 / 2 - 1e-8 <= h <= math.sqrt(2 * delta * l2) + 1e-8

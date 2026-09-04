@@ -1013,6 +1013,158 @@ def greedy_cover_has_a_constant_ratio_is_false(g: Graph) -> bool | None:
     return len(got) <= 2 * len(known)
 
 
+
+# --- Chapter 24: the probabilistic method -----------------------------------
+
+
+@theorem("Every graph has a bipartite subgraph with at least m/2 edges",
+         chapter=24,
+         note="Proved by averaging over random 2-colourings; checked against "
+              "the exhaustive max cut, and separately against the derandomised "
+              "greedy, which must also reach m/2.")
+def max_cut_at_least_half(g: Graph) -> bool | None:
+    from .extremal import greedy_cut, max_cut_bruteforce
+
+    if g.n == 0 or g.n > 8:
+        return None
+    return max_cut_bruteforce(g) >= g.m / 2 and greedy_cut(g) >= g.m / 2
+
+
+# --- Chapter 27: extremal ---------------------------------------------------
+
+
+@theorem("Turan: the K_{r+1}-free maximum is exactly the Turan graph's edge count",
+         chapter=27, family="witnesses",
+         note="Checked by enumerating every graph on n vertices, not by trusting "
+              "the formula.")
+def turan(g: Graph) -> bool | None:
+    from .extremal import max_edges_without_clique, turan_bound, turan_graph
+
+    if g.n < 2 or g.n > 5:
+        return None
+    for r in (2, 3):
+        if max_edges_without_clique(g.n, r + 1) != turan_bound(g.n, r):
+            return False
+        if turan_graph(g.n, r).m != turan_bound(g.n, r):
+            return False
+    return True
+
+
+# --- Chapter 28: Ramsey -----------------------------------------------------
+
+
+@theorem("R(3,3) = 6: every 2-colouring of K_6 has a monochromatic triangle",
+         chapter=28, family="witnesses",
+         note="Exhaustive over all 32768 colourings of K_6, and over all 1024 of "
+              "K_5 to show 6 is not merely an upper bound.")
+def ramsey_three_three(g: Graph) -> bool | None:
+    from .extremal import ramsey_counterexample, ramsey_holds
+
+    if g.n != 6:
+        return None
+    return ramsey_holds(6, 3, 3) and ramsey_counterexample(5, 3, 3) is not None
+
+
+# --- Chapter 29: the adjacency spectrum -------------------------------------
+
+
+@theorem("The adjacency spectrum sums to 0 and its squares sum to 2m", chapter=29)
+def spectrum_traces(g: Graph) -> bool | None:
+    from .spectral import adjacency_spectrum
+
+    if g.n == 0:
+        return None
+    sp = adjacency_spectrum(g)
+    return abs(sum(sp)) < 1e-8 and abs(sum(x * x for x in sp) - 2 * g.m) < 1e-8
+
+
+@theorem("The cube of the spectrum sums to six times the triangle count",
+         chapter=29,
+         note="trace(A^3) counts closed walks of length 3, each triangle giving "
+              "3 starts x 2 directions. Checked against a direct triangle count.")
+def spectrum_counts_triangles(g: Graph) -> bool | None:
+    from .spectral import adjacency_spectrum
+
+    if g.n == 0:
+        return None
+    sp = adjacency_spectrum(g)
+    return abs(sum(x ** 3 for x in sp) - 6 * _triangle_count(g)) < 1e-6
+
+
+@theorem("A d-regular graph has spectral radius exactly d", chapter=29)
+def regular_spectral_radius(g: Graph) -> bool | None:
+    from .spectral import spectral_radius
+
+    if g.n == 0:
+        return None
+    degrees = {g.degree(v) for v in g.vertices()}
+    if len(degrees) != 1:
+        return None
+    return abs(spectral_radius(g) - degrees.pop()) < 1e-8
+
+
+@theorem("The spectral radius lies between the average and maximum degree",
+         chapter=29)
+def spectral_radius_brackets_degree(g: Graph) -> bool | None:
+    from .spectral import spectral_radius
+
+    if g.n == 0:
+        return None
+    average = 2 * g.m / g.n
+    return average - 1e-8 <= spectral_radius(g) <= _max_degree(g) + 1e-8
+
+
+# --- Chapter 30: the Laplacian ----------------------------------------------
+
+
+@theorem("Matrix-tree: a Laplacian cofactor counts spanning trees", chapter=30,
+         note="Checked against the C(m, n-1) enumeration from Chapter 7 -- a "
+              "determinant against a brute-force search.")
+def matrix_tree(g: Graph) -> bool | None:
+    from .mst import spanning_trees
+    from .spectral import spanning_tree_count
+
+    if g.n < 1 or g.n > 6:
+        return None
+    return spanning_tree_count(g) == len(spanning_trees(g))
+
+
+@theorem("The multiplicity of Laplacian eigenvalue 0 is the number of components",
+         chapter=30)
+def laplacian_zero_multiplicity(g: Graph) -> bool | None:
+    from .spectral import laplacian_spectrum
+
+    if g.n == 0:
+        return None
+    zeros = sum(1 for x in laplacian_spectrum(g) if abs(x) < 1e-8)
+    return zeros == len(alg.components(g))
+
+
+@theorem("Algebraic connectivity is positive exactly when the graph is connected",
+         chapter=30)
+def fiedler_positive_iff_connected(g: Graph) -> bool | None:
+    from .spectral import algebraic_connectivity
+
+    if g.n < 2:
+        return None
+    return (algebraic_connectivity(g) > 1e-8) == alg.is_connected(g)
+
+
+@theorem("Cheeger: a(G)/2 <= h(G) <= sqrt(2 * Delta * a(G))", chapter=30,
+         note="Both sides checked against the exponential exact Cheeger constant. "
+              "The two-sided bound is the whole reason spectral clustering works.")
+def cheeger_inequality(g: Graph) -> bool | None:
+    from .spectral import algebraic_connectivity, cheeger_constant
+
+    if g.n < 2 or g.n > 8 or not alg.is_connected(g) or g.m == 0:
+        return None
+    a = algebraic_connectivity(g)
+    h = cheeger_constant(g)
+    import math
+
+    return a / 2 - 1e-8 <= h <= math.sqrt(2 * _max_degree(g) * a) + 1e-8
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
