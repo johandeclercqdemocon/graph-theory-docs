@@ -502,3 +502,93 @@ def test_c5_is_the_smallest_imperfect_graph() -> None:
         assert is_perfect(g)                # nothing smaller than C_5 is imperfect
     # C_4 is perfect but not chordal: chordal is sufficient, not necessary
     assert is_perfect(cycle(4)) and not is_chordal(cycle(4))
+
+
+# --- Part V: hardness -------------------------------------------------------
+
+
+def test_dirac_and_ore_are_sufficient_not_necessary() -> None:
+    from graphs.hamilton import dirac_condition, is_hamiltonian, ore_condition
+
+    assert is_hamiltonian(cycle(5)) and not dirac_condition(cycle(5))   # sufficient only
+    assert dirac_condition(complete(4)) and is_hamiltonian(complete(4))
+    assert ore_condition(complete_bipartite(3, 3))
+    assert not is_hamiltonian(complete_bipartite(2, 3))                 # unequal parts
+    assert not is_hamiltonian(petersen())
+
+
+def test_petersen_is_hypohamiltonian() -> None:
+    from graphs.hamilton import hamiltonian_path, is_hamiltonian
+
+    p = petersen()
+    assert not is_hamiltonian(p)
+    assert hamiltonian_path(p) is not None
+    for v in p.vertices():
+        assert is_hamiltonian(p.subgraph([x for x in p.vertices() if x != v]))
+
+
+def test_gallai_identity_and_complement_duality() -> None:
+    from graphs.approx import max_clique, max_independent_set, min_vertex_cover
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        assert len(max_independent_set(g)) + len(min_vertex_cover(g)) == g.n
+        assert len(max_clique(g)) == len(max_independent_set(g.complement()))
+
+
+def test_the_reduction_carries_optima_across() -> None:
+    from graphs.approx import (
+        independent_set_to_vertex_cover,
+        is_vertex_cover,
+        max_independent_set,
+        min_vertex_cover,
+    )
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        cover = independent_set_to_vertex_cover(g, max_independent_set(g))
+        assert is_vertex_cover(g, cover)
+        assert len(cover) == len(min_vertex_cover(g))
+
+
+def test_matching_heuristic_never_exceeds_twice_optimal() -> None:
+    from graphs.approx import is_vertex_cover, min_vertex_cover, vertex_cover_2approx
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        if g.m == 0:
+            continue
+        got = vertex_cover_2approx(g)
+        assert is_vertex_cover(g, got)
+        assert len(got) <= 2 * len(min_vertex_cover(g))
+
+
+def test_greedy_heuristic_has_no_constant_ratio() -> None:
+    # Small instances favour greedy; the crossover is around n = 50. See Ch 23.
+    from graphs.approx import (
+        greedy_lower_bound_instance,
+        greedy_max_degree_cover,
+        is_vertex_cover,
+        vertex_cover_2approx,
+    )
+
+    small, k_small = greedy_lower_bound_instance(12), 12
+    assert len(greedy_max_degree_cover(small[0])) <= 2 * k_small        # greedy looks fine
+
+    g, known = greedy_lower_bound_instance(16)
+    greedy = greedy_max_degree_cover(g)
+    assert is_vertex_cover(g, greedy)
+    # `known` is a valid cover so OPT <= |known|; exceeding 2|known| exceeds 2*OPT
+    assert len(greedy) > 2 * len(known)
+    assert len(greedy) > len(vertex_cover_2approx(g))   # worse than the crude one
+
+
+def test_fpt_branching_agrees_with_exhaustive_search() -> None:
+    from graphs.approx import min_vertex_cover, vertex_cover_at_most_k
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        optimum = len(min_vertex_cover(g))
+        for k in range(g.n + 1):
+            found = vertex_cover_at_most_k(g, k)
+            assert (found is not None) == (k >= optimum)

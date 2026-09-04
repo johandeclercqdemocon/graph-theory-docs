@@ -38,6 +38,15 @@ def family(name: str, max_n: int) -> list[Graph]:
         out = [random_connected_weighted(rng.randint(2, 7), 0.4, rng) for _ in range(60)]
         out += [random_weighted(rng.randint(2, 7), 0.5, rng) for _ in range(40)]
         return out
+    if name == "greedy_bad":
+        from graphs.approx import greedy_lower_bound_instance
+
+        out = []
+        for k in (8, 12, 16, 20):
+            g, cover = greedy_lower_bound_instance(k)
+            g._known_cover = cover
+            out.append(g)
+        return out
     if name == "flow":
         import random as _random
 

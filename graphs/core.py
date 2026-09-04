@@ -16,7 +16,10 @@ from collections.abc import Iterable, Iterator
 class Graph:
     """A simple undirected graph: no loops, no repeated edges."""
 
-    __slots__ = ("n", "_adj")
+    # `_known_cover` is not part of the graph. It lets a test family attach a
+    # certificate -- a cover whose size bounds OPT -- so Chapter 23's claim can
+    # be checked on a fifty-vertex graph without solving vertex cover on it.
+    __slots__ = ("n", "_adj", "_known_cover")
 
     def __init__(self, n: int, edges: Iterable[tuple[int, int]] = ()) -> None:
         if n < 0:

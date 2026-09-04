@@ -867,6 +867,152 @@ def degeneracy_beats_delta(g: Graph) -> bool | None:
     return alg.chromatic_number(g) <= degeneracy(g) + 1 <= _max_degree(g) + 1
 
 
+
+# --- Chapter 20: Hamiltonicity ----------------------------------------------
+
+
+@theorem("Dirac: min degree >= n/2 implies Hamiltonian (n >= 3)", chapter=20)
+def dirac(g: Graph) -> bool | None:
+    from .hamilton import dirac_condition, is_hamiltonian
+
+    if g.n < 3 or g.n > 6 or not dirac_condition(g):
+        return None
+    return is_hamiltonian(g)
+
+
+@theorem("Ore: deg(u)+deg(v) >= n for all non-adjacent implies Hamiltonian",
+         chapter=20,
+         note="Strictly weaker hypothesis than Dirac, so it applies to more graphs.")
+def ore(g: Graph) -> bool | None:
+    from .hamilton import is_hamiltonian, ore_condition
+
+    if g.n < 3 or g.n > 6 or not ore_condition(g):
+        return None
+    return is_hamiltonian(g)
+
+
+@theorem("Bondy-Chvatal: G is Hamiltonian iff its closure is", chapter=20)
+def bondy_chvatal(g: Graph) -> bool | None:
+    from .hamilton import closure, is_hamiltonian
+
+    if g.n < 3 or g.n > 6:
+        return None
+    return is_hamiltonian(g) == is_hamiltonian(closure(g))
+
+
+@theorem("Every Hamiltonian graph satisfies Dirac's condition", chapter=20,
+         note="Must be refuted. C_5 is Hamiltonian by construction and has "
+              "min degree 2 < 2.5. Dirac is sufficient and nowhere near necessary.")
+def hamiltonian_implies_dirac_is_false(g: Graph) -> bool | None:
+    from .hamilton import dirac_condition, is_hamiltonian
+
+    if g.n < 3 or g.n > 6 or not is_hamiltonian(g):
+        return None
+    return dirac_condition(g)
+
+
+@theorem("A Hamiltonian graph is 2-connected", chapter=20)
+def hamiltonian_is_2_connected(g: Graph) -> bool | None:
+    from .hamilton import is_hamiltonian
+
+    if g.n < 3 or g.n > 6 or not is_hamiltonian(g):
+        return None
+    for v in g.vertices():
+        if not alg.is_connected(g.subgraph([x for x in g.vertices() if x != v])):
+            return False
+    return True
+
+
+# --- Chapter 21: cliques, independent sets, covers --------------------------
+
+
+@theorem("Gallai: alpha(G) + tau(G) = n", chapter=21,
+         note="Independence number and vertex cover number, each computed by its "
+              "own exhaustive search rather than one from the other.")
+def gallai(g: Graph) -> bool | None:
+    from .approx import max_independent_set, min_vertex_cover
+
+    if g.n > 7:
+        return None
+    return len(max_independent_set(g)) + len(min_vertex_cover(g)) == g.n
+
+
+@theorem("A clique in G is an independent set in the complement", chapter=21)
+def clique_complement_independent(g: Graph) -> bool | None:
+    from .approx import max_clique, max_independent_set
+
+    if g.n > 7:
+        return None
+    return len(max_clique(g)) == len(max_independent_set(g.complement()))
+
+
+@theorem("The complement of a maximum independent set is a minimum vertex cover",
+         chapter=22)
+def reduction_preserves_optima(g: Graph) -> bool | None:
+    from .approx import independent_set_to_vertex_cover, is_vertex_cover, max_independent_set, min_vertex_cover
+
+    if g.n > 7:
+        return None
+    cover = independent_set_to_vertex_cover(g, max_independent_set(g))
+    return is_vertex_cover(g, cover) and len(cover) == len(min_vertex_cover(g))
+
+
+# --- Chapter 23: approximation and parameterisation -------------------------
+
+
+@theorem("The matching heuristic returns a cover at most twice optimal",
+         chapter=23)
+def two_approximation(g: Graph) -> bool | None:
+    from .approx import is_vertex_cover, min_vertex_cover, vertex_cover_2approx
+
+    if g.n > 7 or g.m == 0:
+        return None
+    got = vertex_cover_2approx(g)
+    return is_vertex_cover(g, got) and len(got) <= 2 * len(min_vertex_cover(g))
+
+
+@theorem("Bounded search finds a cover of size <= k exactly when one exists",
+         chapter=23,
+         note="The FPT branching algorithm against exhaustive search.")
+def fpt_is_exact(g: Graph) -> bool | None:
+    from .approx import min_vertex_cover, vertex_cover_at_most_k
+
+    if g.n > 7:
+        return None
+    optimum = len(min_vertex_cover(g))
+    for k in range(g.n + 1):
+        found = vertex_cover_at_most_k(g, k)
+        if (found is not None) != (k >= optimum):
+            return False
+        if found is not None and not all(
+            u in found or v in found for u, v in g.edges()
+        ):
+            return False
+    return True
+
+
+@theorem("The max-degree heuristic is at most twice optimal", chapter=23,
+         family="greedy_bad",
+         note="Must be refuted, and this is the chapter's whole point: the "
+              "heuristic that looks cleverer has no constant ratio, while the "
+              "crude matching heuristic has a proved 2. It takes a fifty-vertex "
+              "instance to see it -- on everything smaller greedy looks fine, "
+              "which is exactly why the guarantee matters more than the "
+              "measurements.")
+def greedy_cover_has_a_constant_ratio_is_false(g: Graph) -> bool | None:
+    from .approx import greedy_max_degree_cover, is_vertex_cover
+
+    known = getattr(g, "_known_cover", None)
+    if known is None or g.m == 0:
+        return None
+    got = greedy_max_degree_cover(g)
+    if not is_vertex_cover(g, got):
+        return False
+    # `known` is a valid cover, so OPT <= |known| and this comparison is a
+    # rigorous lower bound on the ratio without ever computing OPT.
+    return len(got) <= 2 * len(known)
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
@@ -943,4 +1089,6 @@ CLAIMS_EXPECTED_TO_FAIL = {
     "Dijkstra is correct when weights may be negative",
     "Augmenting paths find a maximum matching in any graph",
     "m <= 3n - 6 implies planar",
+    "Every Hamiltonian graph satisfies Dirac's condition",
+    "The max-degree heuristic is at most twice optimal",
 }
