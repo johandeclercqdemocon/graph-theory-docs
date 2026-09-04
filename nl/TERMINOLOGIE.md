@@ -37,6 +37,13 @@ voorkeur heeft, kan hier één term wijzigen en de rest van de vertaling erop na
 | face | **vlakdeel** |
 | minor | **minor** |
 | treewidth | **boombreedte** |
+| chordal | **koordaal** |
+| chord | **koorde** |
+| simplicial vertex | **simpliciale knoop** |
+| perfect elimination ordering | **perfecte eliminatievolgorde** |
+| hole / antihole | **gat / antigat** |
+| odd hole | **oneven gat** |
+| perfect graph | **perfecte graaf** |
 
 ## Optimalisatie
 
@@ -52,6 +59,10 @@ voorkeur heeft, kan hier één term wijzigen en de rest van de vertaling erop na
 | cut | **snede** |
 | shortest path | **kortste pad** |
 | eigenvalue | **eigenwaarde** |
+| degeneracy | **degeneratie** |
+| greedy | **gulzig** |
+| crown graph | **kroongraaf** |
+| proper colouring | **geldige kleuring** |
 
 ## Wat níet vertaald is
 
