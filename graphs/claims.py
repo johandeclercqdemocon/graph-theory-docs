@@ -474,6 +474,142 @@ def mst_edge_set_is_unique_is_false(wg) -> bool | None:
     return a == b
 
 
+
+# --- Chapter 10: shortest paths ---------------------------------------------
+
+
+@theorem("Dijkstra is correct when weights are non-negative", chapter=10,
+         family="digraph_nonneg",
+         note="Checked against enumerating every simple path, not against "
+              "Bellman-Ford. Both are mine.")
+def dijkstra_is_correct(d) -> bool | None:
+    from .digraph import INF
+    from .paths import brute_force_shortest, dijkstra
+
+    if d.n == 0 or d.n > 6:
+        return None
+    for s in d.vertices():
+        got = dijkstra(d, s)
+        for t in d.vertices():
+            if got.get(t, INF) != brute_force_shortest(d, s, t):
+                return False
+    return True
+
+
+@theorem("Dijkstra is correct when weights may be negative", chapter=10,
+         family="digraph_negative",
+         note="Must be refuted. The minimal witness has four vertices and four "
+              "arcs, all of weight -1; see the chapter. Note the failure is not "
+              "that a settled vertex is never improved -- this implementation "
+              "does improve it -- but that the improvement never propagates on.")
+def dijkstra_with_negatives_is_false(d) -> bool | None:
+    from .digraph import INF
+    from .paths import brute_force_shortest, dijkstra, has_negative_cycle
+
+    if d.n == 0 or d.n > 5 or has_negative_cycle(d):
+        return None
+    for s in d.vertices():
+        got = dijkstra(d, s)
+        for t in d.vertices():
+            if got.get(t, INF) != brute_force_shortest(d, s, t):
+                return False
+    return True
+
+
+@theorem("Bellman-Ford is correct with negative arcs, absent negative cycles",
+         chapter=10, family="digraph_negative")
+def bellman_ford_is_correct(d) -> bool | None:
+    from .digraph import INF
+    from .paths import bellman_ford, brute_force_shortest, has_negative_cycle
+
+    if d.n == 0 or d.n > 5 or has_negative_cycle(d):
+        return None
+    for s in d.vertices():
+        got, neg = bellman_ford(d, s)
+        if neg:
+            return False          # we already know there is no negative cycle
+        for t in d.vertices():
+            if got.get(t, INF) != brute_force_shortest(d, s, t):
+                return False
+    return True
+
+
+@theorem("Bellman-Ford flags exactly the reachable negative cycles", chapter=10,
+         family="digraph_negative",
+         note="The oracle enumerates cycles directly rather than asking "
+              "Floyd-Warshall, which shares this book's arithmetic.")
+def bellman_ford_detects_negative_cycles(d) -> bool | None:
+    from .paths import bellman_ford
+
+    if d.n == 0 or d.n > 5:
+        return None
+    for s in d.vertices():
+        _, flagged = bellman_ford(d, s)
+        if flagged != _reaches_a_negative_cycle(d, s):
+            return False
+    return True
+
+
+def _reaches_a_negative_cycle(d, source: int) -> bool:
+    """Enumerate every simple cycle, keep the negative ones, and ask whether any
+    is reachable from `source`. Exponential and independent."""
+    reachable = {source}
+    stack = [source]
+    while stack:
+        u = stack.pop()
+        for v in d.successors(u):
+            if v not in reachable:
+                reachable.add(v)
+                stack.append(v)
+    for size in range(2, d.n + 1):
+        for subset in itertools.combinations(range(d.n), size):
+            if not any(v in reachable for v in subset):
+                continue
+            first, *rest = subset
+            for tail in itertools.permutations(rest):
+                walk = (first, *tail)
+                if all(walk[(i + 1) % size] in d.successors(walk[i]) for i in range(size)):
+                    if sum(d.weight(walk[i], walk[(i + 1) % size]) for i in range(size)) < 0:
+                        return True
+    return False
+
+
+# --- Chapter 11: all-pairs distance -----------------------------------------
+
+
+@theorem("Floyd-Warshall agrees with enumerating every simple path", chapter=11,
+         family="digraph_nonneg")
+def floyd_warshall_is_correct(d) -> bool | None:
+    from .paths import brute_force_shortest, floyd_warshall
+
+    if d.n == 0 or d.n > 6:
+        return None
+    got = floyd_warshall(d)
+    for u in d.vertices():
+        for v in d.vertices():
+            if u != v and got[u][v] != brute_force_shortest(d, u, v):
+                return False
+    return True
+
+
+@theorem("Graph distance satisfies the triangle inequality", chapter=11,
+         family="digraph_nonneg")
+def distances_are_a_metric(d) -> bool | None:
+    from .digraph import INF
+    from .paths import floyd_warshall
+
+    if d.n == 0:
+        return None
+    dist = floyd_warshall(d)
+    for u in d.vertices():
+        for v in d.vertices():
+            for w in d.vertices():
+                if dist[u][v] != INF and dist[v][w] != INF:
+                    if dist[u][w] > dist[u][v] + dist[v][w]:
+                        return False
+    return True
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
@@ -547,4 +683,5 @@ CLAIMS_EXPECTED_TO_FAIL = {
     "Triangle-free does not imply bipartite",
     "Equal degree sequences imply isomorphic",
     "Kruskal and Prim always choose the same edges",
+    "Dijkstra is correct when weights may be negative",
 }

@@ -260,3 +260,82 @@ def test_union_find_reports_merges_correctly() -> None:
     assert uf.union(1, 2) is True
     assert uf.union(0, 2) is False       # already connected
     assert uf.find(0) == uf.find(2) != uf.find(3)
+
+
+# --- Part III: shortest paths -----------------------------------------------
+
+
+def test_dijkstra_matches_exhaustive_enumeration() -> None:
+    from graphs.digraph import INF, random_digraph
+    from graphs.paths import brute_force_shortest, dijkstra
+
+    rng = random.Random(51)
+    for _ in range(30):
+        d = random_digraph(rng.randint(2, 6), 0.45, rng)
+        for s in d.vertices():
+            got = dijkstra(d, s)
+            for t in d.vertices():
+                assert got.get(t, INF) == brute_force_shortest(d, s, t)
+
+
+def test_dijkstra_is_wrong_on_the_minimal_negative_witness() -> None:
+    # Four vertices, four arcs, all -1. Found by exhaustive search; see Ch 10.
+    from graphs.digraph import Digraph
+    from graphs.paths import bellman_ford, brute_force_shortest, dijkstra
+
+    d = Digraph(4, [(0, 1, -1), (0, 2, -1), (1, 3, -1), (2, 1, -1)])
+    assert brute_force_shortest(d, 0, 3) == -3
+    assert bellman_ford(d, 0)[0][3] == -3
+    assert dijkstra(d, 0)[3] == -2        # wrong, and this is the point
+    assert dijkstra(d, 0)[1] == -2        # but vertex 1 IS improved correctly
+
+
+def test_bellman_ford_handles_negative_arcs_and_flags_cycles() -> None:
+    from graphs.digraph import INF, random_digraph_with_negatives
+    from graphs.paths import bellman_ford, brute_force_shortest, has_negative_cycle
+
+    rng = random.Random(52)
+    checked = 0
+    for _ in range(60):
+        d = random_digraph_with_negatives(rng.randint(2, 5), 0.5, rng)
+        if has_negative_cycle(d):
+            continue
+        checked += 1
+        for s in d.vertices():
+            got, neg = bellman_ford(d, s)
+            assert not neg
+            for t in d.vertices():
+                assert got.get(t, INF) == brute_force_shortest(d, s, t)
+    assert checked > 0                     # the family must contain usable graphs
+
+
+def test_floyd_warshall_needs_k_outermost() -> None:
+    from graphs.digraph import INF, Digraph
+    from graphs.paths import floyd_warshall
+
+    def wrong(d):
+        n = d.n
+        dist = [[INF] * n for _ in range(n)]
+        for v in range(n):
+            dist[v][v] = 0.0
+        for u, v, w in d.arcs():
+            dist[u][v] = min(dist[u][v], w)
+        for i in range(n):
+            for j in range(n):
+                for k in range(n):
+                    if dist[i][k] + dist[k][j] < dist[i][j]:
+                        dist[i][j] = dist[i][k] + dist[k][j]
+        return dist
+
+    d = Digraph(4, [(0, 3, 2), (2, 1, 1), (3, 0, 1), (3, 2, 4)])
+    assert floyd_warshall(d)[0][1] == 7
+    assert wrong(d)[0][1] == INF           # the classic loop-order bug
+
+
+def test_negative_cycles_show_on_the_diagonal() -> None:
+    from graphs.digraph import Digraph
+    from graphs.paths import floyd_warshall, has_negative_cycle
+
+    neg = Digraph(3, [(0, 1, 1), (1, 2, -3), (2, 0, 1)])
+    assert has_negative_cycle(neg)
+    assert all(floyd_warshall(neg)[v][v] < 0 for v in range(3))

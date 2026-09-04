@@ -38,6 +38,20 @@ def family(name: str, max_n: int) -> list[Graph]:
         out = [random_connected_weighted(rng.randint(2, 7), 0.4, rng) for _ in range(60)]
         out += [random_weighted(rng.randint(2, 7), 0.5, rng) for _ in range(40)]
         return out
+    if name == "digraph_nonneg":
+        import random as _random
+
+        from graphs.digraph import random_digraph
+
+        rng = _random.Random(7)
+        return [random_digraph(rng.randint(2, 6), 0.45, rng) for _ in range(120)]
+    if name == "digraph_negative":
+        import random as _random
+
+        from graphs.digraph import random_digraph_with_negatives
+
+        rng = _random.Random(8)
+        return [random_digraph_with_negatives(rng.randint(2, 5), 0.5, rng) for _ in range(300)]
     if name == "weighted_ties":
         import random as _random
 
