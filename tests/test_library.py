@@ -696,3 +696,84 @@ def test_cheeger_inequality_brackets_the_true_constant() -> None:
         h = cheeger_constant(g)
         delta = max(g.degree(v) for v in g.vertices())
         assert l2 / 2 - 1e-8 <= h <= math.sqrt(2 * delta * l2) + 1e-8
+
+
+# --- Part VII: minors, treewidth, expanders ---------------------------------
+
+
+def test_treewidth_of_named_families() -> None:
+    from graphs.treewidth import grid, treewidth
+
+    assert treewidth(path(5)) == 1
+    assert treewidth(Graph(7, [(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)])) == 1
+    assert treewidth(cycle(5)) == 2
+    assert treewidth(complete(4)) == 3
+    assert treewidth(complete(5)) == 4
+    assert treewidth(grid(2, 3)) == 2
+    assert treewidth(grid(3, 3)) == 3          # planar, and grows with the grid
+
+
+def test_elimination_produces_a_valid_decomposition() -> None:
+    from graphs.generate import small_graphs
+    from graphs.treewidth import is_tree_decomposition, tree_decomposition
+
+    for g in small_graphs(5):
+        bags = tree_decomposition(g, list(g.vertices()))
+        assert is_tree_decomposition(g, bags)
+
+
+def test_treewidth_is_monotone_under_deletion() -> None:
+    from graphs.generate import small_graphs
+    from graphs.treewidth import treewidth
+
+    for g in small_graphs(5):
+        if g.n < 2:
+            continue
+        whole = treewidth(g)
+        for v in g.vertices():
+            assert treewidth(g.subgraph([x for x in g.vertices() if x != v])) <= whole
+
+
+def test_chordal_treewidth_is_max_clique_minus_one() -> None:
+    from graphs.generate import small_graphs
+    from graphs.perfect import is_chordal
+    from graphs.treewidth import treewidth
+
+    for g in small_graphs(5):
+        if g.n and is_chordal(g):
+            assert treewidth(g) == alg.max_clique_size(g) - 1
+
+
+def test_the_two_lambdas_differ_on_a_bipartite_graph() -> None:
+    # The distinction that broke the mixing lemma on the first pass. See Ch 32.
+    from graphs.spectral import mixing_lambda, spectral_expansion
+
+    k33 = complete_bipartite(3, 3)
+    assert abs(spectral_expansion(k33)) < 1e-8      # -3 excluded: bipartite
+    assert abs(mixing_lambda(k33) - 3.0) < 1e-8     # -3 kept: needed by the lemma
+
+
+def test_expander_mixing_lemma_over_all_subset_pairs() -> None:
+    import itertools
+    import math
+
+    from graphs.spectral import expander_mixing_discrepancy, mixing_lambda
+
+    for g in (cycle(6), complete(4), complete_bipartite(3, 3), petersen()):
+        lam = mixing_lambda(g)
+        verts = list(g.vertices())
+        for size_s in range(1, min(g.n, 4) + 1):
+            for s in itertools.combinations(verts, size_s):
+                for size_t in range(1, min(g.n, 4) + 1):
+                    for t in itertools.combinations(verts, size_t):
+                        bound = lam * math.sqrt(len(s) * len(t))
+                        assert expander_mixing_discrepancy(g, set(s), set(t)) <= bound + 1e-6
+
+
+def test_petersen_is_ramanujan_and_cycles_stop_expanding() -> None:
+    from graphs.spectral import cheeger_constant, is_ramanujan
+
+    assert is_ramanujan(petersen())
+    # h(C_n) = 4/n -> 0, so cycles are not an expander family
+    for n in (4, 8, 12):
+        assert abs(cheeger_constant(cycle(n)) - 4 / n) < 1e-9

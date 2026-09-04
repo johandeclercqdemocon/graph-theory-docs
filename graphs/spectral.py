@@ -161,3 +161,78 @@ def cheeger_constant(g: Graph) -> float:
             )
             best = min(best, boundary / size)
     return best
+
+
+def mixing_lambda(g: Graph) -> float:
+    """max |lambda_i| over all eigenvalues except the single trivial d.
+
+    This is the lambda of the **expander mixing lemma**, and -d is NOT excluded
+    even when the graph is bipartite. It cannot be: in K_{3,3} the sets
+    S = {0}, T = {1} lie on the same side, so e(S,T) = 0 while d|S||T|/n = 0.5,
+    and a bound of 0 would be violated. The -3 eigenvalue is exactly what
+    accounts for that discrepancy.
+    """
+    spectrum = adjacency_spectrum(g)
+    if not spectrum:
+        return 0.0
+    d = _regular_degree(g)
+    return max((abs(x) for x in spectrum if abs(x - d) > 1e-9), default=0.0)
+
+
+def spectral_expansion(g: Graph) -> float:
+    """max |lambda_i| excluding d, and also -d when the graph is bipartite.
+
+    This is the lambda of the **Ramanujan condition**, and here -d must be
+    dropped. A bipartite graph always has -d in its spectrum purely because it
+    is bipartite, and keeping it would declare every bipartite graph a poor
+    expander for a reason that has nothing to do with how well connected it is.
+
+    The two lambdas differ, and Chapter 32 is explicit about it: the first
+    version of this module used one function for both, and the expander mixing
+    lemma promptly failed on K_{3,3}.
+    """
+    spectrum = adjacency_spectrum(g)
+    if not spectrum:
+        return 0.0
+    d = _regular_degree(g)
+    trivial = [d, -d] if _is_bipartite(g) else [d]
+    rest = [x for x in spectrum if all(abs(x - t) > 1e-9 for t in trivial)]
+    return max((abs(x) for x in rest), default=0.0)
+
+
+def _regular_degree(g: Graph) -> int:
+    degrees = {g.degree(v) for v in g.vertices()}
+    if len(degrees) != 1:
+        raise ValueError("this quantity is defined here for regular graphs only")
+    return degrees.pop()
+
+
+def _is_bipartite(g: Graph) -> bool:
+    from .algorithms import is_bipartite
+
+    return is_bipartite(g)
+
+
+def is_ramanujan(g: Graph) -> bool:
+    """lambda <= 2*sqrt(d-1): as close to optimal expansion as a d-regular graph
+    can get, by Alon-Boppana. Chapter 32."""
+    degrees = {g.degree(v) for v in g.vertices()}
+    if len(degrees) != 1:
+        return False
+    d = degrees.pop()
+    if d < 2:
+        return True
+    return spectral_expansion(g) <= 2 * math.sqrt(d - 1) + 1e-9
+
+
+def expander_mixing_discrepancy(g: Graph, s: set[int], t: set[int]) -> float:
+    """|e(S,T) - d|S||T|/n|, the quantity the mixing lemma bounds.
+
+    e(S,T) counts ordered pairs, so an edge inside S and T is counted twice --
+    which is the convention the lemma is stated in.
+    """
+    d = g.degree(0) if g.n else 0
+    crossing = sum(
+        1 for u in s for v in t if g.has_edge(u, v)
+    )
+    return abs(crossing - d * len(s) * len(t) / g.n)

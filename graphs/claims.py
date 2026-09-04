@@ -1165,6 +1165,111 @@ def cheeger_inequality(g: Graph) -> bool | None:
     return a / 2 - 1e-8 <= h <= math.sqrt(2 * _max_degree(g) * a) + 1e-8
 
 
+
+# --- Chapter 31: minors and treewidth ---------------------------------------
+
+
+@theorem("Treewidth is 1 exactly for forests with at least one edge", chapter=31)
+def treewidth_of_forests(g: Graph) -> bool | None:
+    from .treewidth import treewidth
+
+    if g.n < 2 or g.n > 6:
+        return None
+    return (treewidth(g) == 1) == (alg.is_forest(g) and g.m > 0)
+
+
+@theorem("Treewidth of K_n is n-1, and of a cycle is 2", chapter=31,
+         family="witnesses")
+def treewidth_of_named_graphs(g: Graph) -> bool | None:
+    from .core import complete, cycle
+    from .generate import canonical
+    from .treewidth import treewidth
+
+    if g.n < 2 or g.n > 6:
+        return None
+    if canonical(g) == canonical(complete(g.n)):
+        return treewidth(g) == g.n - 1
+    if g.n >= 3 and canonical(g) == canonical(cycle(g.n)):
+        return treewidth(g) == 2
+    return None
+
+
+@theorem("Treewidth never increases when passing to a subgraph", chapter=31,
+         note="Minor-monotonicity, checked on the deletion cases. Contraction "
+              "is checked separately because it needs the relabelled graph.")
+def treewidth_is_monotone(g: Graph) -> bool | None:
+    from .treewidth import treewidth
+
+    if g.n < 2 or g.n > 6:
+        return None
+    whole = treewidth(g)
+    for v in g.vertices():
+        if treewidth(g.subgraph([x for x in g.vertices() if x != v])) > whole:
+            return False
+    for u, v in g.edges():
+        if treewidth(Graph(g.n, [e for e in g.edges() if e != (u, v)])) > whole:
+            return False
+    return True
+
+
+@theorem("A tree decomposition from an elimination ordering really is one",
+         chapter=31)
+def elimination_gives_a_decomposition(g: Graph) -> bool | None:
+    from .treewidth import is_tree_decomposition, tree_decomposition
+
+    if g.n < 1 or g.n > 6:
+        return None
+    return is_tree_decomposition(g, tree_decomposition(g, list(g.vertices())))
+
+
+@theorem("Chordal graphs have treewidth = max clique size - 1", chapter=31)
+def chordal_treewidth(g: Graph) -> bool | None:
+    from .perfect import is_chordal
+    from .treewidth import treewidth
+
+    if g.n < 1 or g.n > 6 or not is_chordal(g):
+        return None
+    return treewidth(g) == alg.max_clique_size(g) - 1
+
+
+# --- Chapter 32: expanders --------------------------------------------------
+
+
+@theorem("Expander mixing lemma: |e(S,T) - d|S||T|/n| <= lambda sqrt(|S||T|)",
+         chapter=32,
+         note="Checked over every pair of subsets, against a spectrum computed "
+              "by the Jacobi solver -- combinatorics against linear algebra.")
+def expander_mixing(g: Graph) -> bool | None:
+    import math
+
+    from .spectral import expander_mixing_discrepancy, mixing_lambda
+
+    if g.n < 2 or g.n > 7:
+        return None
+    if len({g.degree(v) for v in g.vertices()}) != 1:
+        return None
+    lam = mixing_lambda(g)
+    for size_s in range(1, g.n + 1):
+        for s in itertools.combinations(g.vertices(), size_s):
+            for size_t in range(1, g.n + 1):
+                for t in itertools.combinations(g.vertices(), size_t):
+                    bound = lam * math.sqrt(len(s) * len(t))
+                    if expander_mixing_discrepancy(g, set(s), set(t)) > bound + 1e-6:
+                        return False
+    return True
+
+
+@theorem("The Petersen graph is Ramanujan", chapter=32, family="witnesses")
+def petersen_is_ramanujan(g: Graph) -> bool | None:
+    from .core import petersen
+    from .generate import canonical
+    from .spectral import is_ramanujan
+
+    if g.n != 10 or canonical(g) != canonical(petersen()):
+        return None
+    return is_ramanujan(g)
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
