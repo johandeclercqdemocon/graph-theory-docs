@@ -15,7 +15,7 @@ vertaald is.
 |---|---|---|
 | I — Grondslagen | 1–5 | **compleet** |
 | II — Bomen en doorlopen | 6–9 | **compleet** |
-| III — Afstand, samenhang, stroom | 10–14 | nog niet |
+| III — Afstand, samenhang, stroom | 10–14 | **compleet** |
 | IV — Kleuring en structuur | 15–19 | nog niet |
 | V — Hardheid | 20–23 | nog niet |
 | VI — Moderne grafentheorie | 24–30 | nog niet |
@@ -33,6 +33,11 @@ Vertaald:
 - [Hoofdstuk 7 — Opspannende bomen en de formule van Cayley](chapters/07-opspannende-bomen.md)
 - [Hoofdstuk 8 — Doorlopen](chapters/08-doorlopen.md)
 - [Hoofdstuk 9 — Minimale opspannende bomen](chapters/09-minimale-opspannende-bomen.md)
+- [Hoofdstuk 10 — Kortste paden](chapters/10-kortste-paden.md)
+- [Hoofdstuk 11 — Afstand tussen alle paren](chapters/11-alle-paren.md)
+- [Hoofdstuk 12 — Samenhang en de stelling van Menger](chapters/12-menger.md)
+- [Hoofdstuk 13 — Max-stroom min-snede](chapters/13-max-stroom.md)
+- [Hoofdstuk 14 — Koppeling](chapters/14-koppeling.md)
 
 De volledige Engelse tekst staat in [`../chapters/`](../chapters/) en
 [`../appendices/`](../appendices/).
