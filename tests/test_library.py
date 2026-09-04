@@ -186,3 +186,77 @@ def test_prufer_decoding_always_produces_a_tree() -> None:
             t = from_prufer([rng.randrange(n) for _ in range(n - 2)])
             assert alg.is_tree(t)
             assert t.n == n
+
+
+# --- Part II: spanning trees and MSTs ---------------------------------------
+
+
+def test_prufer_encode_decode_round_trips() -> None:
+    from graphs.generate import random_tree, to_prufer
+
+    rng = random.Random(31)
+    for n in range(2, 12):
+        for _ in range(10):
+            t = random_tree(n, rng)
+            assert sorted(from_prufer(to_prufer(t)).edges()) == sorted(t.edges())
+
+
+def test_prufer_appearances_give_degrees() -> None:
+    from graphs.generate import random_tree, to_prufer
+
+    rng = random.Random(32)
+    for n in range(3, 10):
+        t = random_tree(n, rng)
+        seq = to_prufer(t)
+        assert [seq.count(v) + 1 for v in t.vertices()] == [t.degree(v) for v in t.vertices()]
+
+
+def test_cayleys_formula_by_enumeration() -> None:
+    from graphs.mst import spanning_trees
+
+    for n in range(2, 7):
+        assert len(spanning_trees(complete(n))) == n ** (n - 2)
+
+
+def test_kruskal_and_prim_hit_the_true_minimum() -> None:
+    from graphs.mst import brute_force_mst, kruskal, prim
+    from graphs.weighted import random_connected_weighted
+
+    rng = random.Random(41)
+    for _ in range(40):
+        wg = random_connected_weighted(rng.randint(2, 7), 0.4, rng)
+        best = brute_force_mst(wg)
+        assert best is not None
+        assert wg.subgraph_weight(kruskal(wg)) == best[1]
+        assert wg.subgraph_weight(prim(wg)) == best[1]
+
+
+def test_the_mst_edge_set_is_not_unique_under_ties() -> None:
+    # Four vertices is the smallest case, found by exhaustive search. See Ch 9.
+    from graphs.mst import kruskal, prim
+    from graphs.weighted import WeightedGraph
+
+    g = WeightedGraph(4, [(0, 2, 1), (0, 3, 1), (1, 2, 1), (1, 3, 1)])
+    k = sorted(kruskal(g))
+    p = sorted((min(u, v), max(u, v)) for u, v in prim(g, source=1))
+    assert g.subgraph_weight(k) == g.subgraph_weight(p)   # the weight is unique
+    assert k != p                                          # the tree is not
+
+
+def test_kruskal_returns_a_forest_on_disconnected_input() -> None:
+    from graphs.mst import kruskal
+    from graphs.weighted import WeightedGraph
+
+    g = WeightedGraph(5, [(0, 1, 1), (1, 2, 2), (3, 4, 3)])
+    assert alg.is_forest(Graph(5, kruskal(g)))
+    assert len(kruskal(g)) == 5 - 2      # n - (number of components)
+
+
+def test_union_find_reports_merges_correctly() -> None:
+    from graphs.mst import UnionFind
+
+    uf = UnionFind(5)
+    assert uf.union(0, 1) is True
+    assert uf.union(1, 2) is True
+    assert uf.union(0, 2) is False       # already connected
+    assert uf.find(0) == uf.find(2) != uf.find(3)

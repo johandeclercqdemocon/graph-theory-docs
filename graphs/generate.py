@@ -79,6 +79,29 @@ def random_tree(n: int, rng: random.Random) -> Graph:
     return from_prufer(seq)
 
 
+def to_prufer(t: Graph) -> list[int]:
+    """Encode a labelled tree as a sequence of n-2 vertex labels.
+
+    Repeatedly remove the lowest-numbered leaf and record its neighbour. The
+    inverse of `from_prufer`, and Chapter 7 proves the pair is a bijection --
+    which is what makes Cayley's formula a counting exercise rather than a
+    theorem needing its own proof.
+    """
+    if t.n <= 2:
+        return []
+    degree = [t.degree(v) for v in t.vertices()]
+    neighbours = [set(t.neighbours(v)) for v in t.vertices()]
+    seq: list[int] = []
+    for _ in range(t.n - 2):
+        leaf = min(v for v in t.vertices() if degree[v] == 1)
+        parent = next(iter(neighbours[leaf]))
+        seq.append(parent)
+        degree[leaf] = 0
+        neighbours[parent].discard(leaf)
+        degree[parent] -= 1
+    return seq
+
+
 def from_prufer(seq: list[int]) -> Graph:
     """Decode a Prufer sequence into the tree it names. Chapter 7 proves this is
     a bijection, which is what makes Cayley's formula n^(n-2) fall out."""

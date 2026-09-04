@@ -29,6 +29,23 @@ from graphs.generate import random_graphs, small_graphs, witnesses  # noqa: E402
 def family(name: str, max_n: int) -> list[Graph]:
     if name == "small":
         return list(small_graphs(max_n))
+    if name == "weighted":
+        import random as _random
+
+        from graphs.weighted import random_connected_weighted, random_weighted
+
+        rng = _random.Random(5)
+        out = [random_connected_weighted(rng.randint(2, 7), 0.4, rng) for _ in range(60)]
+        out += [random_weighted(rng.randint(2, 7), 0.5, rng) for _ in range(40)]
+        return out
+    if name == "weighted_ties":
+        import random as _random
+
+        from graphs.weighted import random_connected_weighted
+
+        # Weights in 1..2, so ties are common. See the claim's note.
+        rng = _random.Random(4)
+        return [random_connected_weighted(rng.randint(3, 7), 0.5, rng, hi=2) for _ in range(400)]
     if name == "witnesses":
         return witnesses()
     if name == "random":

@@ -95,6 +95,44 @@ def _max_degree(g: Graph) -> int:
     return max((g.degree(v) for v in g.vertices()), default=0)
 
 
+def _all_paths(g: Graph, u: int, v: int) -> list[tuple[int, ...]]:
+    """Every simple path from u to v. Exponential, and that is the point."""
+    if u == v:
+        return [(u,)]
+    out: list[tuple[int, ...]] = []
+    stack: list[tuple[int, tuple[int, ...]]] = [(u, (u,))]
+    while stack:
+        node, sofar = stack.pop()
+        for w in g.neighbours(node):
+            if w == v:
+                out.append(sofar + (w,))
+            elif w not in sofar:
+                stack.append((w, sofar + (w,)))
+    return out
+
+
+def _count_cycle_vertex_sets(g: Graph) -> int:
+    """How many vertex subsets host at least one cycle.
+
+    NOT the number of cycles: K_4 has three distinct 4-cycles on its single
+    4-subset and this returns 1 for it. It is used only where the graph is a
+    tree plus one edge, which has exactly one cycle, so the two counts coincide.
+    """
+    found = 0
+    for size in range(3, g.n + 1):
+        for subset in itertools.combinations(g.vertices(), size):
+            first, *rest = subset
+            seen_here = False
+            for tail in itertools.permutations(rest):
+                walk = (first,) + tail
+                if all(g.has_edge(walk[i], walk[(i + 1) % size]) for i in range(size)):
+                    seen_here = True
+                    break
+            if seen_here:
+                found += 1
+    return found
+
+
 # --- Chapter 3: degree ------------------------------------------------------
 
 
@@ -283,6 +321,159 @@ def trees_are_bipartite(g: Graph) -> bool | None:
     return alg.is_bipartite(g)
 
 
+@theorem("A tree has a unique path between any two vertices", chapter=6,
+         note="Uniqueness is checked by enumerating every path, not by trusting BFS.")
+def trees_have_unique_paths(g: Graph) -> bool | None:
+    if not alg.is_tree(g) or g.n < 2:
+        return None
+    for u, v in itertools.combinations(g.vertices(), 2):
+        if len(_all_paths(g, u, v)) != 1:
+            return False
+    return True
+
+
+@theorem("Adding an edge to a tree creates exactly one cycle", chapter=6)
+def adding_an_edge_makes_one_cycle(g: Graph) -> bool | None:
+    if not alg.is_tree(g) or g.n < 3:
+        return None
+    for u, v in itertools.combinations(g.vertices(), 2):
+        if g.has_edge(u, v):
+            continue
+        g.add_edge(u, v)
+        cycles = _count_cycle_vertex_sets(g)
+        g.remove_edge(u, v)
+        if cycles != 1:
+            return False
+    return True
+
+
+@theorem("Removing any edge of a tree disconnects it", chapter=6)
+def every_tree_edge_is_a_bridge(g: Graph) -> bool | None:
+    if not alg.is_tree(g) or g.n < 2:
+        return None
+    for u, v in list(g.edges()):
+        g.remove_edge(u, v)
+        still = alg.is_connected(g)
+        g.add_edge(u, v)
+        if still:
+            return False
+    return True
+
+
+# --- Chapter 7: spanning trees ----------------------------------------------
+
+
+@theorem("Prufer encoding and decoding are mutually inverse", chapter=7)
+def prufer_round_trips(g: Graph) -> bool | None:
+    if not alg.is_tree(g):
+        return None
+    from .generate import from_prufer, to_prufer
+
+    seq = to_prufer(g)
+    if g.n <= 2:
+        return from_prufer(seq).n == g.n if g.n == 2 else True
+    return sorted(from_prufer(seq).edges()) == sorted(g.edges())
+
+
+@theorem("Cayley: K_n has exactly n^(n-2) labelled spanning trees", chapter=7,
+         family="witnesses",
+         note="Counted by enumerating every spanning tree, not by the formula.")
+def cayley(g: Graph) -> bool | None:
+    from .core import complete
+    from .generate import canonical
+    from .mst import spanning_trees
+
+    if g.n < 1 or g.n > 6 or canonical(g) != canonical(complete(g.n)):
+        return None
+    return len(spanning_trees(g)) == (1 if g.n <= 2 else g.n ** (g.n - 2))
+
+
+@theorem("Every connected graph has a spanning tree", chapter=7)
+def connected_has_spanning_tree(g: Graph) -> bool | None:
+    if not alg.is_connected(g) or g.n == 0 or g.n > 6:
+        return None
+    from .mst import spanning_trees
+
+    return len(spanning_trees(g)) >= 1
+
+
+# --- Chapter 8: traversal ---------------------------------------------------
+
+
+@theorem("BFS distances equal true shortest-path lengths", chapter=8,
+         note="Compared against the shortest path found by enumerating all paths.")
+def bfs_finds_shortest_paths(g: Graph) -> bool | None:
+    if g.n == 0 or g.n > 6:
+        return None
+    for source in g.vertices():
+        by_bfs = alg.distances(g, source)
+        for target in g.vertices():
+            paths = _all_paths(g, source, target)
+            if not paths:
+                if target in by_bfs and target != source:
+                    return False
+                continue
+            if by_bfs.get(target) != min(len(p) - 1 for p in paths):
+                return False
+    return True
+
+
+@theorem("DFS and BFS reach exactly the same vertices", chapter=8)
+def dfs_and_bfs_agree_on_reachability(g: Graph) -> bool:
+    return all(
+        set(alg.bfs_order(g, v)) == set(alg.dfs_order(g, v)) for v in g.vertices()
+    )
+
+
+# --- Chapter 9: minimum spanning trees --------------------------------------
+
+
+@theorem("Kruskal and Prim both achieve the true minimum weight", chapter=9,
+         family="weighted",
+         note="Checked against enumerating every spanning tree and taking the "
+              "cheapest. Two greedy algorithms agreeing would prove nothing.")
+def mst_algorithms_are_optimal(wg) -> bool | None:
+    from .mst import brute_force_mst, kruskal, prim
+
+    if wg.n == 0 or wg.n > 7:
+        return None
+    best = brute_force_mst(wg)
+    if best is None:
+        return None
+    return (
+        wg.subgraph_weight(kruskal(wg)) == best[1]
+        and wg.subgraph_weight(prim(wg)) == best[1]
+    )
+
+
+@theorem("An MST of a connected graph has exactly n-1 edges", chapter=9,
+         family="weighted")
+def mst_is_a_spanning_tree(wg) -> bool | None:
+    from .mst import kruskal
+
+    if wg.n == 0 or not alg.is_connected(wg.graph):
+        return None
+    chosen = kruskal(wg)
+    return len(chosen) == wg.n - 1 and alg.is_tree(Graph(wg.n, chosen))
+
+
+@theorem("Kruskal and Prim always choose the same edges", chapter=9,
+         family="weighted_ties",
+         note="Must be refuted. With tied weights the minimum spanning tree is "
+              "not unique, so 'the' MST is a misnomer -- the minimum WEIGHT is "
+              "unique, the tree is not. This needs a family with ties in it: on "
+              "weights drawn from 1..20 the two algorithms agreed on all 79 "
+              "graphs and the claim wrongly held.")
+def mst_edge_set_is_unique_is_false(wg) -> bool | None:
+    from .mst import kruskal, prim
+
+    if wg.n < 3 or not alg.is_connected(wg.graph):
+        return None
+    a = sorted(kruskal(wg))
+    b = sorted((min(u, v), max(u, v)) for u, v in prim(wg))
+    return a == b
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
@@ -355,4 +546,5 @@ def mantel(g: Graph) -> bool | None:
 CLAIMS_EXPECTED_TO_FAIL = {
     "Triangle-free does not imply bipartite",
     "Equal degree sequences imply isomorphic",
+    "Kruskal and Prim always choose the same edges",
 }
