@@ -106,9 +106,9 @@ CODEHILITE = """
 """
 
 
-def read_title() -> tuple[str, str]:
+def read_title(base: pathlib.Path) -> tuple[str, str]:
     """Title and subtitle from README.md: the H1, then the first paragraph."""
-    readme = (ROOT / "README.md").read_text()
+    readme = (base / "README.md").read_text()
     title = next((l[2:].strip() for l in readme.splitlines() if l.startswith("# ")), ROOT.name)
     subtitle = ""
     seen_h1 = False
@@ -122,8 +122,13 @@ def read_title() -> tuple[str, str]:
     return title, subtitle
 
 
-def source_files() -> list[pathlib.Path]:
-    return sorted((ROOT / "chapters").glob("*.md")) + sorted((ROOT / "appendices").glob("*.md"))
+def source_files(base: pathlib.Path) -> list[pathlib.Path]:
+    """Chapters then appendices, each in filename order.
+
+    `base` is the repo root for the English book and `nl/` for the Dutch one;
+    the layout below it is identical, so one builder serves both.
+    """
+    return sorted((base / "chapters").glob("*.md")) + sorted((base / "appendices").glob("*.md"))
 
 
 def strip_links(text: str) -> str:
@@ -172,12 +177,16 @@ def rebase_images(text: str, source: pathlib.Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Typeset the book as a single PDF.")
     parser.add_argument("--out", default=None, help="output path (default <repo-name>.pdf)")
+    parser.add_argument("--source", default=".",
+                        help="directory holding README.md, chapters/ and appendices/ "
+                             "(default '.'; use 'nl' for the Dutch translation)")
     args = parser.parse_args()
 
-    title, subtitle = read_title()
-    files = source_files()
+    base = (ROOT / args.source).resolve()
+    title, subtitle = read_title(base)
+    files = source_files(base)
     if not files:
-        sys.exit("no chapters/*.md or appendices/*.md found")
+        sys.exit(f"no chapters/*.md or appendices/*.md under {base}")
 
     missing = [
         str(p) for f in files
@@ -225,7 +234,8 @@ def main() -> int:
 {"".join(sections)}
 </body></html>"""
 
-    out = pathlib.Path(args.out) if args.out else ROOT / f"{ROOT.name}.pdf"
+    suffix = "" if base == ROOT else f"-{base.name}"
+    out = pathlib.Path(args.out) if args.out else ROOT / f"{ROOT.name}{suffix}.pdf"
     HTML(string=html, base_url=str(ROOT)).write_pdf(out)
     print(f"  {out.name}: {len(files)} sections, {words:,} words, "
           f"{out.stat().st_size / 1024:.0f} KB")
