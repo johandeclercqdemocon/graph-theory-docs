@@ -16,7 +16,7 @@ vertaald is.
 | I — Grondslagen | 1–5 | **compleet** |
 | II — Bomen en doorlopen | 6–9 | **compleet** |
 | III — Afstand, samenhang, stroom | 10–14 | **compleet** |
-| IV — Kleuring en structuur | 15–19 | nog niet |
+| IV — Kleuring en structuur | 15–19 | **compleet** |
 | V — Hardheid | 20–23 | nog niet |
 | VI — Moderne grafentheorie | 24–30 | nog niet |
 | VII — Grenzen | 31–32 | nog niet |
@@ -38,6 +38,11 @@ Vertaald:
 - [Hoofdstuk 12 — Samenhang en de stelling van Menger](chapters/12-menger.md)
 - [Hoofdstuk 13 — Max-stroom min-snede](chapters/13-max-stroom.md)
 - [Hoofdstuk 14 — Koppeling](chapters/14-koppeling.md)
+- [Hoofdstuk 15 — Kleuring](chapters/15-kleuring.md)
+- [Hoofdstuk 16 — Bipartiete grafen](chapters/16-bipartiet.md)
+- [Hoofdstuk 17 — Vlakheid](chapters/17-vlakheid.md)
+- [Hoofdstuk 18 — De vijf- en de vierkleurenstelling](chapters/18-vier-kleuren.md)
+- [Hoofdstuk 19 — Perfecte en koordale grafen](chapters/19-perfecte-grafen.md)
 
 De volledige Engelse tekst staat in [`../chapters/`](../chapters/) en
 [`../appendices/`](../appendices/).
