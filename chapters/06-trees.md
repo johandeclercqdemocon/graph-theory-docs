@@ -59,6 +59,12 @@ shortcut would make the claim circular.
 
 ## Leaves
 
+![A tree](../figures/tree.svg)
+
+Seven vertices, six edges, four leaves — and drawn rooted, though a tree has no root until
+you choose one.
+
+
 A **leaf** is a vertex of degree 1.
 
 > **Theorem.** Every tree on `n ≥ 2` vertices has at least two leaves.

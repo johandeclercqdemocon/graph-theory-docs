@@ -6,6 +6,12 @@ much richer question than it looks.
 
 ## Existence
 
+![Spanning tree of C6](../figures/spanning-tree.svg)
+
+A spanning tree of `C₆`: delete any one edge of the cycle and what remains is a tree on all
+six vertices. `C₆` has exactly six spanning trees, one per deleted edge.
+
+
 > **Theorem.** Every connected graph has a spanning tree.
 
 *Proof.* Among all connected spanning subgraphs of `G`, take one with the fewest edges; call

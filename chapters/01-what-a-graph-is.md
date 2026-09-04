@@ -43,6 +43,12 @@ Chapter 2 is about why that matters more than it sounds.
 
 ## The drawing is not the graph
 
+![P5](../figures/p5.svg) ![C5](../figures/c5.svg) ![K4](../figures/k4.svg)
+
+Three of the five named graphs above, drawn. Each picture is *a* choice — the graph
+supplies no positions, and Chapter 17 is about what does and does not survive that choice.
+
+
 Draw the graph above and you get a square. Draw it again with the vertices in a different
 order and you get a bow tie with a crossing in the middle. Both drawings are correct,
 because **a graph has no geometry**. There are no positions, no lengths, no angles, and no
@@ -91,6 +97,12 @@ in this book have directed analogues; some are harder (Chapter 12), some are eas
 some are false.
 
 ## A first family of graphs
+
+![K3,3](../figures/k33.svg) ![Petersen](../figures/petersen.svg)
+
+`K₃,₃` drawn as two columns, which makes its bipartiteness obvious; the Petersen graph in
+its customary pentagon-and-pentagram layout. Neither drawing is forced by the graph.
+
 
 Five graphs come up so often they get names, and you should be able to picture all five.
 

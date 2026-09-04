@@ -127,17 +127,46 @@ def source_files() -> list[pathlib.Path]:
 
 
 def strip_links(text: str) -> str:
-    """Turn relative markdown links into plain text.
+    """Turn relative markdown links into plain text, leaving images alone.
 
     In a single-file PDF a link to `../appendices/e-solutions.md` resolves to
     nothing. Cross-references read fine as prose, and the section titles are in
     the table of contents.
+
+    The negative lookbehind is load-bearing: without it `![alt](fig.svg)` matches
+    as a link and becomes `!alt`, silently deleting every figure from the PDF
+    while leaving a stray exclamation mark behind.
     """
     def replace(match: re.Match) -> str:
         label, target = match.group(1), match.group(2)
         return label if not target.startswith(("http://", "https://", "mailto:")) else match.group(0)
 
-    return re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace, text)
+    return re.sub(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", replace, text)
+
+
+def rebase_images(text: str, source: pathlib.Path) -> str:
+    """Rewrite image paths to be relative to the repo root.
+
+    Chapters live in `chapters/` and refer to `../figures/x.svg`, which is right
+    for GitHub. The PDF concatenates every file under one `base_url` of the repo
+    root, where `../figures/` points *outside* the repo.
+
+    WeasyPrint drops a missing image silently -- no warning, no error, no gap in
+    the page. The first build of this book shipped with every figure absent and
+    a PDF that looked entirely fine, which is why this function exists and why
+    `build_figures.py` output is checked into the tree rather than assumed.
+    """
+    def replace(match: re.Match) -> str:
+        alt, target = match.group(1), match.group(2)
+        if target.startswith(("http://", "https://", "data:")):
+            return match.group(0)
+        resolved = (source.parent / target).resolve()
+        try:
+            return f"![{alt}]({resolved.relative_to(ROOT)})"
+        except ValueError:
+            return match.group(0)
+
+    return re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", replace, text)
 
 
 def main() -> int:
@@ -150,12 +179,23 @@ def main() -> int:
     if not files:
         sys.exit("no chapters/*.md or appendices/*.md found")
 
+    missing = [
+        str(p) for f in files
+        for p in [(f.parent / m).resolve()
+                  for m in re.findall(r"!\[[^\]]*\]\(([^)]+)\)", f.read_text())
+                  if not m.startswith(("http://", "https://", "data:"))]
+        if not p.exists()
+    ]
+    if missing:
+        sys.exit("figures referenced but not on disk (run scripts/build_figures.py):\n  "
+                 + "\n  ".join(missing))
+
     md = markdown.Markdown(extensions=["fenced_code", "tables", "codehilite", "attr_list"],
                            extension_configs={"codehilite": {"guess_lang": False}})
 
     sections, toc = [], []
     for i, path in enumerate(files):
-        text = strip_links(path.read_text())
+        text = rebase_images(strip_links(path.read_text()), path)
         heading = next((l[2:].strip() for l in text.splitlines() if l.startswith("# ")), path.stem)
         anchor = f"sec{i}"
         toc.append((anchor, heading, path.parent.name == "appendices"))

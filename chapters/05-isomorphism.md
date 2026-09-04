@@ -23,6 +23,12 @@ this easy to state.
 
 ## Invariants, and what they cannot do
 
+![C6](../figures/c6.svg) ![Two triangles](../figures/two-triangles.svg)
+
+The two graphs this chapter turns on: both 2-regular on six vertices, identical degree
+sequences, and not isomorphic. One is connected and the other is not.
+
+
 An **invariant** is anything preserved by isomorphism: `n`, `m`, the degree sequence, the
 number of triangles, the multiset of component sizes. Every invariant gives a **one-sided
 test**. If two graphs differ on any invariant, they are certainly not isomorphic. If they

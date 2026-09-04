@@ -95,6 +95,12 @@ are.
 
 ## Kuratowski and Wagner
 
+![K5](../figures/k5.svg) ![K3,3](../figures/k33.svg)
+
+The two forbidden minors. Every drawing of either has a crossing, and every non-planar
+graph contains one of them.
+
+
 > **Theorem (Kuratowski, 1930).** `G` is planar if and only if it contains no *subdivision*
 > of `K₅` or `K₃,₃`.
 >
