@@ -128,6 +128,7 @@ python scripts/verify_theorems.py --chapter 15   # just one chapter's claims
 - [A — Notation](appendices/a-notation.md) — every symbol, one page
 - [B — Glossary](appendices/b-glossary.md)
 - [C — Further reading](appendices/c-further-reading.md)
+- [E — Solutions to the exercises](appendices/e-solutions.md)
 
 ---
 

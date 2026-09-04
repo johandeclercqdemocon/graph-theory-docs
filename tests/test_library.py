@@ -426,3 +426,79 @@ def test_augmenting_paths_undercount_on_an_odd_cycle() -> None:
     c7 = cycle(7)
     assert max_matching_bruteforce(c7) == 3
     assert matching_size(bipartite_matching(c7, [0, 1, 2, 6])) == 2
+
+
+# --- Part IV: colouring, planarity, perfection ------------------------------
+
+
+def test_greedy_order_changes_the_answer_on_crown_graphs() -> None:
+    from graphs.planar import degeneracy
+
+    n = 4
+    g = Graph(2 * n, [(i, n + j) for i in range(n) for j in range(n) if i != j])
+    interleaved = [x for i in range(n) for x in (i, n + i)]
+    assert alg.chromatic_number(g) == 2
+    assert max(alg.greedy_colouring(g).values()) + 1 == 2
+    assert max(alg.greedy_colouring(g, interleaved).values()) + 1 == n   # bad order
+    assert degeneracy(g) == n - 1
+
+
+def test_degeneracy_beats_max_degree_on_a_star() -> None:
+    from graphs.planar import degeneracy
+
+    star = Graph(8, [(0, i) for i in range(1, 8)])
+    assert max(star.degree(v) for v in star.vertices()) == 7
+    assert degeneracy(star) == 1
+    assert alg.chromatic_number(star) == 2
+
+
+def test_planarity_of_the_standard_examples() -> None:
+    from graphs.planar import bipartite_euler_bound, euler_bound, is_planar
+
+    assert is_planar(complete(4))
+    assert not is_planar(complete(5))
+    assert not is_planar(complete_bipartite(3, 3))
+    assert not is_planar(petersen())
+    # K3,3 passes the general bound and fails the triangle-free one
+    assert euler_bound(complete_bipartite(3, 3))
+    assert not bipartite_euler_bound(complete_bipartite(3, 3))
+    # the Petersen graph passes BOTH and is still not planar
+    assert euler_bound(petersen()) and bipartite_euler_bound(petersen())
+
+
+def test_eulers_formula_from_a_traced_embedding() -> None:
+    from graphs.planar import planar_face_count
+
+    for g in (complete(4), cycle(5), path(6)):
+        f = planar_face_count(g)
+        assert f is not None
+        assert g.n - g.m + f == 2
+
+
+def test_wagner_agrees_with_the_embedding_search() -> None:
+    from graphs.planar import has_minor, is_planar
+
+    for g in (complete(4), complete(5), cycle(5), complete_bipartite(2, 3)):
+        by_minor = not has_minor(g, complete(5)) and not has_minor(g, complete_bipartite(3, 3))
+        assert is_planar(g) == by_minor
+
+
+def test_chordality_against_an_independent_cycle_search() -> None:
+    from graphs.perfect import has_long_chordless_cycle_bruteforce, is_chordal
+    from graphs.generate import small_graphs
+
+    for g in small_graphs(5):
+        assert is_chordal(g) == (not has_long_chordless_cycle_bruteforce(g))
+
+
+def test_c5_is_the_smallest_imperfect_graph() -> None:
+    from graphs.perfect import has_odd_antihole, has_odd_hole, is_chordal, is_perfect
+    from graphs.generate import small_graphs
+
+    assert not is_perfect(cycle(5))
+    assert alg.chromatic_number(cycle(5)) == 3 and alg.max_clique_size(cycle(5)) == 2
+    assert has_odd_hole(cycle(5)) and has_odd_antihole(cycle(5))   # self-complementary
+    for g in small_graphs(4):
+        assert is_perfect(g)                # nothing smaller than C_5 is imperfect
+    # C_4 is perfect but not chordal: chordal is sufficient, not necessary
+    assert is_perfect(cycle(4)) and not is_chordal(cycle(4))

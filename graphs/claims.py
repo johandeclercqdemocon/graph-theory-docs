@@ -745,6 +745,128 @@ def augmenting_paths_need_bipartiteness(g: Graph) -> bool | None:
     return got == max_matching_bruteforce(g)
 
 
+
+# --- Chapter 17: planarity --------------------------------------------------
+
+
+@theorem("Euler's formula: n - m + f = 2 for connected planar graphs", chapter=17,
+         note="f is counted from an actual embedding by tracing faces, not read "
+              "off the formula being tested.")
+def eulers_formula(g: Graph) -> bool | None:
+    from .planar import is_planar, planar_face_count
+
+    if g.n < 1 or g.n > 6 or not alg.is_connected(g) or not is_planar(g):
+        return None
+    f = planar_face_count(g)
+    return f is not None and g.n - g.m + f == 2
+
+
+@theorem("A planar graph with n >= 3 has m <= 3n - 6", chapter=17)
+def planar_edge_bound(g: Graph) -> bool | None:
+    from .planar import is_planar
+
+    if g.n < 3 or g.n > 6 or not is_planar(g):
+        return None
+    return g.m <= 3 * g.n - 6
+
+
+@theorem("m <= 3n - 6 implies planar", chapter=17, family="witnesses",
+         note="Must be refuted. K_{3,3} has 9 <= 12 and is not planar: the Euler "
+              "bound is necessary and not sufficient. The triangle-free form "
+              "m <= 2n - 4 does catch it.")
+def euler_bound_is_sufficient_is_false(g: Graph) -> bool | None:
+    from .planar import euler_bound, is_planar
+
+    if g.n < 3 or g.n > 7 or not euler_bound(g):
+        return None
+    return is_planar(g)
+
+
+@theorem("Wagner: planar iff no K5 minor and no K3,3 minor", chapter=17,
+         note="Rotation-system embedding against exhaustive minor search -- two "
+              "entirely unrelated computations.")
+def wagner(g: Graph) -> bool | None:
+    from .core import complete, complete_bipartite
+    from .planar import has_minor, is_planar
+
+    if g.n < 1 or g.n > 5:
+        return None
+    by_minor = not has_minor(g, complete(5)) and not has_minor(g, complete_bipartite(3, 3))
+    return is_planar(g) == by_minor
+
+
+@theorem("Every planar graph has a vertex of degree at most 5", chapter=18)
+def planar_has_low_degree_vertex(g: Graph) -> bool | None:
+    from .planar import is_planar
+
+    if g.n < 1 or g.n > 6 or not is_planar(g):
+        return None
+    return min(g.degree(v) for v in g.vertices()) <= 5
+
+
+@theorem("Every planar graph is 4-colourable", chapter=18,
+         note="The four colour theorem, checked rather than proved -- and this "
+              "book cannot prove it. See the chapter.")
+def four_colour_theorem(g: Graph) -> bool | None:
+    from .planar import is_planar
+
+    if g.n < 1 or g.n > 6 or not is_planar(g):
+        return None
+    return alg.chromatic_number(g) <= 4
+
+
+# --- Chapter 19: perfect graphs ---------------------------------------------
+
+
+@theorem("Chordality test agrees with searching for a chordless long cycle",
+         chapter=19)
+def chordality_is_correct(g: Graph) -> bool | None:
+    from .perfect import has_long_chordless_cycle_bruteforce, is_chordal
+
+    if g.n > 6:
+        return None
+    return is_chordal(g) == (not has_long_chordless_cycle_bruteforce(g))
+
+
+@theorem("Every chordal graph is perfect", chapter=19)
+def chordal_implies_perfect(g: Graph) -> bool | None:
+    from .perfect import is_chordal, is_perfect
+
+    if g.n > 5 or not is_chordal(g):
+        return None
+    return is_perfect(g)
+
+
+@theorem("Berge: perfect iff no odd hole and no odd antihole", chapter=19,
+         note="The strong perfect graph theorem (Chudnovsky-Robertson-Seymour-"
+              "Thomas, 2006). Checked, emphatically not proved.")
+def strong_perfect_graph_theorem(g: Graph) -> bool | None:
+    from .perfect import has_odd_antihole, has_odd_hole, is_perfect
+
+    if g.n > 5:
+        return None
+    return is_perfect(g) == (not has_odd_hole(g) and not has_odd_antihole(g))
+
+
+@theorem("Greedy colouring uses at most degeneracy + 1 colours", chapter=15)
+def degeneracy_bounds_greedy(g: Graph) -> bool | None:
+    from .planar import degeneracy, degeneracy_order
+
+    if g.n == 0:
+        return None
+    used = alg.greedy_colouring(g, degeneracy_order(g))
+    return max(used.values()) + 1 <= degeneracy(g) + 1
+
+
+@theorem("chi <= degeneracy + 1, which is never worse than Delta + 1", chapter=15)
+def degeneracy_beats_delta(g: Graph) -> bool | None:
+    from .planar import degeneracy
+
+    if g.n == 0:
+        return None
+    return alg.chromatic_number(g) <= degeneracy(g) + 1 <= _max_degree(g) + 1
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
@@ -820,4 +942,5 @@ CLAIMS_EXPECTED_TO_FAIL = {
     "Kruskal and Prim always choose the same edges",
     "Dijkstra is correct when weights may be negative",
     "Augmenting paths find a maximum matching in any graph",
+    "m <= 3n - 6 implies planar",
 }
