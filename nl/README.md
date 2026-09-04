@@ -13,8 +13,8 @@ vertaald is.
 
 | Deel | Hoofdstukken | Status |
 |---|---|---|
-| I — Grondslagen | 1–5 | 3 van 5 vertaald |
-| II — Bomen en doorlopen | 6–9 | nog niet |
+| I — Grondslagen | 1–5 | **compleet** |
+| II — Bomen en doorlopen | 6–9 | **compleet** |
 | III — Afstand, samenhang, stroom | 10–14 | nog niet |
 | IV — Kleuring en structuur | 15–19 | nog niet |
 | V — Hardheid | 20–23 | nog niet |
@@ -27,6 +27,12 @@ Vertaald:
 - [Hoofdstuk 1 — Wat een graaf is](chapters/01-wat-een-graaf-is.md)
 - [Hoofdstuk 2 — Representaties](chapters/02-representaties.md)
 - [Hoofdstuk 3 — Graad](chapters/03-graad.md)
+- [Hoofdstuk 4 — Wandelingen, paden, samenhang](chapters/04-wandelingen-en-samenhang.md)
+- [Hoofdstuk 5 — Isomorfie](chapters/05-isomorfie.md)
+- [Hoofdstuk 6 — Bomen](chapters/06-bomen.md)
+- [Hoofdstuk 7 — Opspannende bomen en de formule van Cayley](chapters/07-opspannende-bomen.md)
+- [Hoofdstuk 8 — Doorlopen](chapters/08-doorlopen.md)
+- [Hoofdstuk 9 — Minimale opspannende bomen](chapters/09-minimale-opspannende-bomen.md)
 
 De volledige Engelse tekst staat in [`../chapters/`](../chapters/) en
 [`../appendices/`](../appendices/).
