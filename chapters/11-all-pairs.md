@@ -186,6 +186,15 @@ because row 3 has not been processed yet — and nothing ever revisits row 0. Th
 order finalises *all* paths through vertex `k` before moving to `k+1`, so no row can be left
 behind.
 
+## Exercises
+
+1. What is Floyd–Warshall's running time, and what data structure does it need?
+2. Why must the `k` loop be outermost?
+3. What does a negative entry on the diagonal of the output mean?
+4. Give a two-vertex digraph where `d(u,v)` is finite and `d(v,u)` is infinite.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Floyd–Warshall inducts on *which vertices a path may pass through*, not on distance from a

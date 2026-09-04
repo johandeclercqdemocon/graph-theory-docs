@@ -190,6 +190,18 @@ The first line favours the list by a wide margin and the second favours the matr
 representation is better; they answer different questions well, and the only way to know
 which one you need is to know which question you are asking.
 
+## Exercises
+
+1. For `n = 1000` and `p = 0.01`, how many edges are there on average, and how many entries
+   does the adjacency matrix have?
+2. Which representation would you choose to count triangles through a given vertex, and why?
+3. `MatrixGraph.has_edge` looks like a constant-time bit test. Explain why it is not, in this
+   implementation.
+4. In this book's code the bitset matrix used *less* memory than the adjacency list at
+   `n = 600`. Give the reason, and say whether it would still hold in C.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Edge list for input and output, adjacency list for traversal, adjacency matrix for

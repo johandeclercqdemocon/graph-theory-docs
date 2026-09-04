@@ -148,6 +148,16 @@ after removing 2-3 from the cycle: is_tree = True connected = True
 Adding an edge broke the tree; removing a *different* edge of the cycle it created restored
 one. That is the exchange property, and Chapter 9 turns it into an algorithm.
 
+## Exercises
+
+1. A tree has 12 vertices. How many edges does it have?
+2. What is the smallest number of leaves a tree on `n ≥ 2` vertices can have, and which tree
+   achieves it?
+3. You add one edge to a tree. How many cycles does the result contain?
+4. Every tree is bipartite. Is every bipartite graph a tree? Give a witness.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Five definitions of a tree, all equivalent. Use whichever makes the proof shortest:

@@ -126,8 +126,9 @@ theorem; `(1 − 1/r)n²/2` is a convenient asymptotic that is never smaller and
 
 1. Verify Mantel's bound for `n = 5` by finding a triangle-free graph with 6 edges.
 2. Why does making the Turán graph's parts equal maximise the edge count? Use convexity.
-3. Erdős–Stone says forbidding `K₄` and forbidding the Petersen graph give the same leading
-   term. Check that both have chromatic number 3.
+3. Erdős–Stone says the answer depends on `H` only through `χ(H)`. Find the chromatic
+   numbers of `K₃`, `K₄` and the Petersen graph, and say which two of the three give the same
+   leading term.
 4. Why does Erdős–Stone say nothing useful when `H` is bipartite?
 
 Solutions in [Appendix E](../appendices/e-solutions.md).

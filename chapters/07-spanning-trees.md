@@ -147,6 +147,17 @@ round trips:     True
 
 The second and third lines are identical, which is the lemma the whole proof turns on.
 
+## Exercises
+
+1. How many labelled spanning trees does `K₄` have? Check against Cayley's formula.
+2. Compute the Prüfer sequence of the path `0—1—2—3` by hand.
+3. A vertex appears `deg(v) − 1` times in a Prüfer sequence. What does that say about the
+   labels that never appear?
+4. There are 1296 labelled trees on 6 vertices but only 6 up to isomorphism. Explain the gap
+   in one sentence.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Every connected graph has a spanning tree, by the extremal argument: take a minimal

@@ -167,6 +167,17 @@ that this counts each triangle **twice** — once in each direction — which is
 standard formula for the number of triangles is `trace(A³)/6`: three starting points, two
 directions.
 
+## Exercises
+
+1. Give a walk that is not a path, and a path that is not a cycle, in `C₅`.
+2. What does `(A²)_{vv}` equal, and why?
+3. What is the minimum number of edges in a connected graph on `n` vertices, and which graphs
+   achieve it?
+4. Concatenating two paths need not give a path. Explain why connectivity is still an
+   equivalence relation.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Walk, path, cycle are three different things. A walk repeats; a path does not; a cycle

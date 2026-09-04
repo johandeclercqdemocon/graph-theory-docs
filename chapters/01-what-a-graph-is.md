@@ -159,6 +159,19 @@ Both are four-cycles. They are not equal, because equality of labelled graphs as
 the *same pairs* are joined, and here they are not. The relation you actually wanted is
 isomorphism, and it is hard enough to need Chapter 5 to itself.
 
+## Exercises
+
+1. `K_n` has `n(n−1)/2` edges. Verify this for `n = 6` by counting, and check it against
+   `complete(6).m`.
+2. The Petersen graph is 3-regular on 10 vertices. How many edges does it have, without
+   counting them one by one?
+3. Write two different edge lists that produce the *same labelled graph*, and one that
+   produces a different labelled graph on the same vertices.
+4. Three authors write one paper together. Explain what is lost when this is modelled as
+   three pairwise edges, and name the structure that would not lose it.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - A graph is a finite vertex set and a set of unordered pairs. Simple by default: no

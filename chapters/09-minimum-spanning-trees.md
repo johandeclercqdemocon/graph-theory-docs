@@ -181,6 +181,15 @@ spanning tree.
 Four vertices is the smallest this can happen on, found by exhaustive search rather than by
 guessing — and the first two graphs I guessed both had the two algorithms agreeing.
 
+## Exercises
+
+1. State the cut property, and say which word in it is load-bearing.
+2. Give a graph with two different minimum spanning trees of equal weight.
+3. What does Kruskal return when the input graph is disconnected?
+4. Under what condition is the minimum spanning tree unique?
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - The cut property is the whole subject: the strictly-lightest edge across any cut is in

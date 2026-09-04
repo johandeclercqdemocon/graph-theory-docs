@@ -173,6 +173,18 @@ Note the fourth: `[5, 1, 1, 1, 1, 1]` is graphical on **six** vertices — it is
 `K_{1,5}` — even though it would be impossible on five. Degree sequences carry `n` with
 them, and forgetting that is the most common way to misread this section.
 
+## Exercises
+
+1. Can nine people each shake hands with exactly three others? Justify your answer with the
+   handshake lemma.
+2. Is `[4, 3, 2, 1, 0]` graphical? Run Havel–Hakimi by hand.
+3. What is the sum of the degrees of the Petersen graph, and what does that tell you about
+   its edge count?
+4. The theorem "two vertices share a degree" requires `n ≥ 2`. Give the one-vertex graph and
+   explain precisely which step of the proof fails.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - The handshake lemma is a double count, and double counting is the workhorse technique of

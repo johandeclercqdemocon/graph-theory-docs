@@ -157,6 +157,17 @@ C_6, opposite vertices:
 A cycle gives 2 both ways, which is the smallest interesting case: two routes round, and you
 must cut two edges to stop them.
 
+## Exercises
+
+1. State weak duality for vertex cuts, and explain why it proves nothing on its own.
+2. Why does the vertex form of Menger's theorem require `s` and `t` to be non-adjacent?
+3. Give a graph where `κ(G) < λ(G) < δ(G)` — or explain why one of those inequalities cannot
+   be strict.
+4. In the vertex-splitting construction, why is the internal arc given capacity 1 and the
+   edge arcs infinity?
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Menger is a min–max theorem: disjoint paths versus cut size, in both a vertex and an edge

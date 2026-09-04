@@ -176,6 +176,18 @@ Edmonds–Karp finds this immediately because BFS takes the two-arc paths first.
 taking the three-arc path `0→1→2→3` first would have to *undo* it via the reverse arc, which
 is exactly the situation reverse arcs exist for.
 
+## Exercises
+
+1. Why does the residual network need reverse arcs? What breaks without them?
+2. Ford–Fulkerson does not specify which augmenting path to take. What goes wrong if you
+   choose badly?
+3. State the integrality corollary and explain why it is what makes flow useful for
+   combinatorial problems.
+4. An arc runs from the sink side back to the source side of a cut. How much does it
+   contribute to the cut's capacity?
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Max-flow equals min-cut, and the proof is constructive: the residual-reachable set of the

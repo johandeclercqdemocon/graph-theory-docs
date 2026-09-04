@@ -143,6 +143,16 @@ BFS reaches vertex 7 second, because it is one step away. DFS reaches it last, h
 the entire seven-edge detour first. Both are correct traversals; only one of them knows
 anything about distance.
 
+## Exercises
+
+1. You need shortest paths in an unweighted graph. BFS or DFS, and why is the other one
+   wrong rather than merely slower?
+2. What is the running time of both searches, and why is it the same?
+3. In a BFS, you find an edge joining two vertices in the same level. What have you found?
+4. Why does this book write DFS iteratively rather than recursively?
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - BFS and DFS differ only by queue versus stack, and both run in `O(n + m)`.

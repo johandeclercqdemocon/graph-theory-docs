@@ -166,6 +166,19 @@ actually isomorphic:   False
 Three lines, and the middle one is the subject of this chapter: a test that says "I cannot
 tell" is not a test that says "yes".
 
+## Exercises
+
+1. Are `C₆` and two disjoint triangles isomorphic? Give a reason that does not require any
+   computation.
+2. The degree sequence is an invariant. Explain in one sentence why that makes it useful for
+   disproving isomorphism and useless for proving it.
+3. Why does colour refinement fail to separate any two regular graphs of the same degree and
+   size?
+4. How many graphs are there on 4 vertices up to isomorphism? Check your answer against
+   `all_graphs_up_to_iso(4)`.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Isomorphism is relabelling. Equality of labelled graphs is a different and much stronger

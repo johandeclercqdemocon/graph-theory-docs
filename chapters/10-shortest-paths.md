@@ -194,6 +194,16 @@ for t in range(4):
 Three of the four are right. Only the vertex *downstream* of the late improvement is wrong,
 which is why this failure is easy to miss on a graph you have not checked exhaustively.
 
+## Exercises
+
+1. Dijkstra's proof uses non-negativity in exactly one inequality. Which one?
+2. What is Bellman–Ford's running time, and why is it worse than Dijkstra's?
+3. What does the `n`-th relaxation round of Bellman–Ford detect?
+4. A negative cycle is reachable from `s`. What is the shortest walk from `s` to a vertex on
+   that cycle?
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Negative weights force direction, which is why the book turns to digraphs here.

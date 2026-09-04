@@ -194,6 +194,16 @@ is not a cover at all.
 Picking this example took a search. The obvious small bipartite graphs give a cover that is
 just the whole left side, which is trivially a cover and demonstrates nothing.
 
+## Exercises
+
+1. Define an augmenting path, and say what flipping one does to the matching size.
+2. State Berge's theorem and name the technique its proof uses.
+3. The simple augmenting search is wrong on non-bipartite graphs. What structure defeats it?
+4. König's theorem says max matching equals min vertex cover. Compute both for a triangle and
+   explain the result.
+
+Solutions in [Appendix E](../appendices/e-solutions.md).
+
 ## Takeaways
 
 - Berge: a matching is maximum iff no augmenting path exists. Proved by symmetric

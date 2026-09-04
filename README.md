@@ -3,9 +3,10 @@
 A book that starts at "what is a graph" and ends at graph minors and spectral expansion,
 taking proofs seriously the whole way.
 
-Thirty-two chapters, three appendices, and a library you build alongside them. Every
-theorem is proved in the prose and *also* stated as code the machine can try to refute —
-exhaustively on every graph up to six vertices, randomly on larger ones.
+Thirty-two chapters, four appendices, 128 exercises with worked solutions, and a library you
+build alongside them. Every theorem is proved in the prose and *also* stated as code the
+machine can try to refute — exhaustively on every graph up to six vertices, randomly on
+larger ones.
 
 ## What makes this book different
 
@@ -52,6 +53,9 @@ python -m pytest -q                              # the library's own tests
 python scripts/verify_theorems.py                # every theorem, exhaustive to n = 5
 python scripts/verify_theorems.py --exhaustive   # to n = 6; minutes, not seconds
 python scripts/verify_theorems.py --chapter 15   # just one chapter's claims
+python scripts/check_links.py                    # every internal link resolves
+python scripts/bench_representations.py          # Chapter 2's measurements
+python scripts/random_graph_experiments.py       # Chapters 25 and 26's experiments
 ```
 
 ---
@@ -128,7 +132,7 @@ python scripts/verify_theorems.py --chapter 15   # just one chapter's claims
 - [A — Notation](appendices/a-notation.md) — every symbol, one page
 - [B — Glossary](appendices/b-glossary.md)
 - [C — Further reading](appendices/c-further-reading.md)
-- [E — Solutions to the exercises](appendices/e-solutions.md)
+- [E — Solutions to the exercises](appendices/e-solutions.md) — all 128, worked
 
 ---
 
