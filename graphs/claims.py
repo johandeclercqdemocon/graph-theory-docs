@@ -610,6 +610,141 @@ def distances_are_a_metric(d) -> bool | None:
     return True
 
 
+
+# --- Chapter 12: Menger -----------------------------------------------------
+
+
+@theorem("Menger (edge form): max edge-disjoint s-t paths = min s-t edge cut",
+         chapter=12,
+         note="The left side is computed by unit-capacity max-flow, the right by "
+              "deleting every subset of edges. Different machinery on each side.")
+def menger_edge(g: Graph) -> bool | None:
+    from .flow import brute_force_edge_cut, edge_connectivity
+
+    if g.n < 2 or g.n > 5 or g.m > 8:
+        return None
+    for s, t in itertools.combinations(g.vertices(), 2):
+        if edge_connectivity(g, s, t) != brute_force_edge_cut(g, s, t):
+            return False
+    return True
+
+
+@theorem("Menger (vertex form): max internally-disjoint paths = min s-t vertex cut",
+         chapter=12,
+         note="Vertex splitting against exhaustive vertex deletion.")
+def menger_vertex(g: Graph) -> bool | None:
+    from .flow import brute_force_vertex_cut, vertex_connectivity
+
+    if g.n < 2 or g.n > 5:
+        return None
+    for s, t in itertools.combinations(g.vertices(), 2):
+        if g.has_edge(s, t):
+            continue
+        if vertex_connectivity(g, s, t) != brute_force_vertex_cut(g, s, t):
+            return False
+    return True
+
+
+# --- Chapter 13: max-flow min-cut -------------------------------------------
+
+
+@theorem("Max-flow equals min-cut", chapter=13, family="flow",
+         note="Edmonds-Karp against enumerating all 2^(n-2) cuts.")
+def max_flow_min_cut(net) -> bool | None:
+    if net.n < 2 or net.n > 7:
+        return None
+    value, _ = net.max_flow(0, net.n - 1)
+    return abs(value - net.brute_force_min_cut(0, net.n - 1)) < 1e-9
+
+
+@theorem("The cut the algorithm reports really has the flow's value", chapter=13,
+         family="flow",
+         note="Not the same claim: this checks the CONSTRUCTION, not the number.")
+def reported_cut_is_tight(net) -> bool | None:
+    if net.n < 2 or net.n > 7:
+        return None
+    value, side = net.min_cut(0, net.n - 1)
+    return abs(net.cut_capacity(side) - value) < 1e-9
+
+
+@theorem("Integer capacities give an integer maximum flow", chapter=13, family="flow")
+def integrality(net) -> bool | None:
+    if net.n < 2 or net.n > 7:
+        return None
+    if any(c != int(c) for c in net.cap.values() if c != float("inf")):
+        return None
+    value, _ = net.max_flow(0, net.n - 1)
+    return value == int(value)
+
+
+# --- Chapter 14: matching ---------------------------------------------------
+
+
+@theorem("Konig: in a bipartite graph, max matching = min vertex cover",
+         chapter=14, family="bipartite",
+         note="Matching by augmenting paths, cover by exhaustive subset search.")
+def konig(g: Graph) -> bool | None:
+    from .matching import bipartite_matching, bipartition, matching_size, min_vertex_cover_bruteforce
+
+    if g.n == 0 or g.n > 8:
+        return None
+    parts = bipartition(g)
+    if parts is None:
+        return None
+    return matching_size(bipartite_matching(g, parts[0])) == min_vertex_cover_bruteforce(g)
+
+
+@theorem("Konig's construction returns a cover of exactly the matching's size",
+         chapter=14, family="bipartite")
+def konig_construction_works(g: Graph) -> bool | None:
+    from .matching import bipartite_matching, bipartition, konig_cover, matching_size
+
+    if g.n == 0 or g.n > 8:
+        return None
+    parts = bipartition(g)
+    if parts is None:
+        return None
+    left, right = parts
+    cover = konig_cover(g, left, right)
+    covers_everything = all(u in cover or v in cover for u, v in g.edges())
+    return covers_everything and len(cover) == matching_size(bipartite_matching(g, left))
+
+
+@theorem("Hall: every left vertex can be matched iff |N(S)| >= |S| for all S",
+         chapter=14, family="bipartite",
+         note="Hall's condition checked over every subset -- the statement is "
+              "about all of them, so anything cheaper would assume the theorem.")
+def halls_theorem(g: Graph) -> bool | None:
+    from .matching import bipartite_matching, bipartition, hall_condition, matching_size
+
+    if g.n == 0 or g.n > 8:
+        return None
+    parts = bipartition(g)
+    if parts is None:
+        return None
+    left, _ = parts
+    saturates_left = matching_size(bipartite_matching(g, left)) == len(left)
+    return saturates_left == hall_condition(g, left)
+
+
+@theorem("Augmenting paths find a maximum matching in any graph", chapter=14,
+         family="witnesses",
+         note="Must be refuted. The bipartite routine has no blossom step, so an "
+              "odd cycle can defeat it -- C_7 with left = {0,1,2,6} returns 2 "
+              "where 3 exists. Note it gets C_3 and C_5 right for every choice "
+              "of left, so a small test would miss this entirely.")
+def augmenting_paths_need_bipartiteness(g: Graph) -> bool | None:
+    from .matching import bipartite_matching, matching_size, max_matching_bruteforce
+
+    if g.n != 7 or not alg.has_odd_cycle(g):
+        return None
+    try:
+        got = matching_size(bipartite_matching(g, [0, 1, 2, 6]))
+    except (ValueError, RecursionError):
+        return None
+    return got == max_matching_bruteforce(g)
+
+
 # --- Chapter 15: colouring --------------------------------------------------
 
 
@@ -684,4 +819,5 @@ CLAIMS_EXPECTED_TO_FAIL = {
     "Equal degree sequences imply isomorphic",
     "Kruskal and Prim always choose the same edges",
     "Dijkstra is correct when weights may be negative",
+    "Augmenting paths find a maximum matching in any graph",
 }

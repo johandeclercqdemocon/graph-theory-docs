@@ -339,3 +339,90 @@ def test_negative_cycles_show_on_the_diagonal() -> None:
     neg = Digraph(3, [(0, 1, 1), (1, 2, -3), (2, 0, 1)])
     assert has_negative_cycle(neg)
     assert all(floyd_warshall(neg)[v][v] < 0 for v in range(3))
+
+
+# --- Part III: flow, connectivity, matching ---------------------------------
+
+
+def test_max_flow_equals_min_cut_on_the_reference_network() -> None:
+    from graphs.flow import FlowNetwork
+
+    net = FlowNetwork(6, [(0, 1, 16), (0, 2, 13), (1, 2, 10), (2, 1, 4), (1, 3, 12),
+                          (3, 2, 9), (2, 4, 14), (4, 3, 7), (3, 5, 20), (4, 5, 4)])
+    assert net.max_flow(0, 5)[0] == 23.0
+    value, side = net.min_cut(0, 5)
+    assert net.cut_capacity(side) == value == 23.0
+    assert net.brute_force_min_cut(0, 5) == 23.0
+
+
+def test_max_flow_matches_exhaustive_min_cut() -> None:
+    from graphs.flow import FlowNetwork
+
+    rng = random.Random(61)
+    for _ in range(40):
+        size = rng.randint(2, 6)
+        arcs = [(u, v, float(rng.randint(1, 9)))
+                for u in range(size) for v in range(size)
+                if u != v and rng.random() < 0.45]
+        net = FlowNetwork(size, arcs)
+        assert abs(net.max_flow(0, size - 1)[0] - net.brute_force_min_cut(0, size - 1)) < 1e-9
+
+
+def test_menger_both_forms_against_exhaustive_deletion() -> None:
+    import itertools as it
+
+    from graphs.flow import (
+        brute_force_edge_cut,
+        brute_force_vertex_cut,
+        edge_connectivity,
+        vertex_connectivity,
+    )
+
+    for g in (petersen(), cycle(6), complete_bipartite(3, 3)):
+        for s, t in it.islice(it.combinations(g.vertices(), 2), 6):
+            assert edge_connectivity(g, s, t) == brute_force_edge_cut(g, s, t)
+            if not g.has_edge(s, t):
+                assert vertex_connectivity(g, s, t) == brute_force_vertex_cut(g, s, t)
+
+
+def test_konig_and_hall_on_random_bipartite_graphs() -> None:
+    from graphs.matching import (
+        bipartite_matching,
+        bipartition,
+        hall_condition,
+        konig_cover,
+        matching_size,
+        min_vertex_cover_bruteforce,
+    )
+
+    rng = random.Random(62)
+    for _ in range(60):
+        a, b = rng.randint(1, 4), rng.randint(1, 4)
+        g = Graph(a + b, [(i, a + j) for i in range(a) for j in range(b) if rng.random() < 0.5])
+        parts = bipartition(g)
+        if parts is None:
+            continue
+        left, right = parts
+        size = matching_size(bipartite_matching(g, left))
+        assert size == min_vertex_cover_bruteforce(g)          # Konig
+        cover = konig_cover(g, left, right)
+        assert len(cover) == size
+        assert all(u in cover or v in cover for u, v in g.edges())
+        assert (size == len(left)) == hall_condition(g, left)  # Hall
+
+
+def test_konig_fails_on_the_triangle() -> None:
+    from graphs.matching import max_matching_bruteforce, min_vertex_cover_bruteforce
+
+    t = cycle(3)
+    assert max_matching_bruteforce(t) == 1
+    assert min_vertex_cover_bruteforce(t) == 2      # not bipartite, so not equal
+
+
+def test_augmenting_paths_undercount_on_an_odd_cycle() -> None:
+    # C_7 with left = {0,1,2,6}. C_3 and C_5 do NOT expose this; see Ch 14.
+    from graphs.matching import bipartite_matching, matching_size, max_matching_bruteforce
+
+    c7 = cycle(7)
+    assert max_matching_bruteforce(c7) == 3
+    assert matching_size(bipartite_matching(c7, [0, 1, 2, 6])) == 2

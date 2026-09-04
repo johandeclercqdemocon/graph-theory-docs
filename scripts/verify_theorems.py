@@ -38,6 +38,36 @@ def family(name: str, max_n: int) -> list[Graph]:
         out = [random_connected_weighted(rng.randint(2, 7), 0.4, rng) for _ in range(60)]
         out += [random_weighted(rng.randint(2, 7), 0.5, rng) for _ in range(40)]
         return out
+    if name == "flow":
+        import random as _random
+
+        from graphs.flow import FlowNetwork
+
+        rng = _random.Random(12)
+        out = []
+        for _ in range(80):
+            size = rng.randint(2, 7)
+            arcs = [
+                (u, v, float(rng.randint(1, 9)))
+                for u in range(size)
+                for v in range(size)
+                if u != v and rng.random() < 0.45
+            ]
+            out.append(FlowNetwork(size, arcs))
+        return out
+    if name == "bipartite":
+        import random as _random
+
+        from graphs.core import Graph as _G
+
+        rng = _random.Random(13)
+        out = []
+        for _ in range(120):
+            a, b = rng.randint(1, 4), rng.randint(1, 4)
+            out.append(_G(a + b, [
+                (i, a + j) for i in range(a) for j in range(b) if rng.random() < 0.5
+            ]))
+        return out
     if name == "digraph_nonneg":
         import random as _random
 
