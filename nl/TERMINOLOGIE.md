@@ -70,6 +70,21 @@ voorkeur heeft, kan hier één term wijzigen en de rest van de vertaling erop na
 | NP-hard / NP-complete | **NP-moeilijk / NP-volledig** |
 | approximation ratio | **benaderingsfactor** |
 | gadget | **gadget** |
+| probabilistic method | **probabilistische methode** |
+| linearity of expectation | **lineariteit van de verwachting** |
+| union bound | **uniegrens** |
+| deletion method | **verwijderingsmethode** |
+| threshold | **drempel** |
+| giant component | **reuzencomponent** |
+| branching process | **vertakkingsproces** |
+| extremal | **extremaal** |
+| trace | **spoor** |
+| interlacing | **verstrengeling** |
+| cospectral | **cospectraal** |
+| Laplacian | **Laplaciaan** |
+| algebraic connectivity | **algebraïsche samenhang** |
+| Cheeger constant | **Cheeger-constante** |
+| relaxation | **relaxatie** |
 
 ## Wat níet vertaald is
 

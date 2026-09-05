@@ -18,7 +18,7 @@ vertaald is.
 | III — Afstand, samenhang, stroom | 10–14 | **compleet** |
 | IV — Kleuring en structuur | 15–19 | **compleet** |
 | V — Hardheid | 20–23 | **compleet** |
-| VI — Moderne grafentheorie | 24–30 | nog niet |
+| VI — Moderne grafentheorie | 24–30 | **compleet** |
 | VII — Grenzen | 31–32 | nog niet |
 | Bijlagen | A, B, C, E | nog niet |
 
@@ -47,6 +47,13 @@ Vertaald:
 - [Hoofdstuk 21 — Klieken, onafhankelijke verzamelingen, overdekkingen](chapters/21-klieken-en-overdekkingen.md)
 - [Hoofdstuk 22 — NP-moeilijkheid](chapters/22-np-moeilijkheid.md)
 - [Hoofdstuk 23 — Leven met hardheid](chapters/23-benaderen.md)
+- [Hoofdstuk 24 — De probabilistische methode](chapters/24-probabilistische-methode.md)
+- [Hoofdstuk 25 — Toevalsgrafen](chapters/25-toevalsgrafen.md)
+- [Hoofdstuk 26 — De reuzencomponent](chapters/26-reuzencomponent.md)
+- [Hoofdstuk 27 — Extremale grafentheorie](chapters/27-extremaal.md)
+- [Hoofdstuk 28 — Ramsey-theorie](chapters/28-ramsey.md)
+- [Hoofdstuk 29 — Spectrale grafentheorie](chapters/29-spectraal.md)
+- [Hoofdstuk 30 — De Laplaciaan](chapters/30-laplaciaan.md)
 
 De volledige Engelse tekst staat in [`../chapters/`](../chapters/) en
 [`../appendices/`](../appendices/).
