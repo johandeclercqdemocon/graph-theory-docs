@@ -17,7 +17,7 @@ vertaald is.
 | II — Bomen en doorlopen | 6–9 | **compleet** |
 | III — Afstand, samenhang, stroom | 10–14 | **compleet** |
 | IV — Kleuring en structuur | 15–19 | **compleet** |
-| V — Hardheid | 20–23 | nog niet |
+| V — Hardheid | 20–23 | **compleet** |
 | VI — Moderne grafentheorie | 24–30 | nog niet |
 | VII — Grenzen | 31–32 | nog niet |
 | Bijlagen | A, B, C, E | nog niet |
@@ -43,6 +43,10 @@ Vertaald:
 - [Hoofdstuk 17 — Vlakheid](chapters/17-vlakheid.md)
 - [Hoofdstuk 18 — De vijf- en de vierkleurenstelling](chapters/18-vier-kleuren.md)
 - [Hoofdstuk 19 — Perfecte en koordale grafen](chapters/19-perfecte-grafen.md)
+- [Hoofdstuk 20 — Hamiltoniciteit](chapters/20-hamiltoniciteit.md)
+- [Hoofdstuk 21 — Klieken, onafhankelijke verzamelingen, overdekkingen](chapters/21-klieken-en-overdekkingen.md)
+- [Hoofdstuk 22 — NP-moeilijkheid](chapters/22-np-moeilijkheid.md)
+- [Hoofdstuk 23 — Leven met hardheid](chapters/23-benaderen.md)
 
 De volledige Engelse tekst staat in [`../chapters/`](../chapters/) en
 [`../appendices/`](../appendices/).

@@ -63,6 +63,13 @@ voorkeur heeft, kan hier één term wijzigen en de rest van de vertaling erop na
 | greedy | **gulzig** |
 | crown graph | **kroongraaf** |
 | proper colouring | **geldige kleuring** |
+| Hamiltonian | **Hamiltoniaans** |
+| Eulerian circuit | **Euler-circuit** |
+| closure (Bondy-Chvatal) | **afsluiting** |
+| reduction | **reductie** |
+| NP-hard / NP-complete | **NP-moeilijk / NP-volledig** |
+| approximation ratio | **benaderingsfactor** |
+| gadget | **gadget** |
 
 ## Wat níet vertaald is
 
