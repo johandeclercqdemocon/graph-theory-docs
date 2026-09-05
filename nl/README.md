@@ -8,8 +8,8 @@ code, de verificatie en de figuren zijn gedeeld; alleen de tekst is vertaald.
 
 ## Status van de vertaling
 
-Deze vertaling is **in uitvoering**. Het Engelse boek is compleet; hieronder staat wat er van
-vertaald is.
+Deze vertaling is **compleet**: alle 32 hoofdstukken en alle vier de bijlagen, inclusief de 128
+uitgewerkte oplossingen.
 
 | Deel | Hoofdstukken | Status |
 |---|---|---|
@@ -19,8 +19,8 @@ vertaald is.
 | IV — Kleuring en structuur | 15–19 | **compleet** |
 | V — Hardheid | 20–23 | **compleet** |
 | VI — Moderne grafentheorie | 24–30 | **compleet** |
-| VII — Grenzen | 31–32 | nog niet |
-| Bijlagen | A, B, C, E | nog niet |
+| VII — Grenzen | 31–32 | **compleet** |
+| Bijlagen | A, B, C, E | **compleet** |
 
 Vertaald:
 
@@ -54,6 +54,15 @@ Vertaald:
 - [Hoofdstuk 28 — Ramsey-theorie](chapters/28-ramsey.md)
 - [Hoofdstuk 29 — Spectrale grafentheorie](chapters/29-spectraal.md)
 - [Hoofdstuk 30 — De Laplaciaan](chapters/30-laplaciaan.md)
+- [Hoofdstuk 31 — Minoren en boombreedte](chapters/31-minoren-en-boombreedte.md)
+- [Hoofdstuk 32 — Expanders, en waar je hierna heen gaat](chapters/32-expanders.md)
+
+Bijlagen:
+
+- [Bijlage A — Notatie](appendices/a-notatie.md)
+- [Bijlage B — Woordenlijst](appendices/b-woordenlijst.md)
+- [Bijlage C — Verder lezen](appendices/c-verder-lezen.md)
+- [Bijlage E — Oplossingen bij de oefeningen](appendices/e-oplossingen.md)
 
 De volledige Engelse tekst staat in [`../chapters/`](../chapters/) en
 [`../appendices/`](../appendices/).
@@ -83,11 +92,8 @@ wordt niet herschreven.**
 
 ## De PDF bouwen
 
-Wanneer de vertaling compleet is:
-
 ```bash
 python scripts/build_pdf.py --source nl
 ```
 
-Dat schrijft `graph-theory-book-nl.pdf`. Er is bewust nog geen Nederlandse PDF ingecheckt: een
-PDF van drie hoofdstukken die "het boek" heet, zou verkeerd voorstellen wat er klaar is.
+Dat schrijft `graph-theory-book-nl.pdf`, die in deze repository staat naast de Engelse.

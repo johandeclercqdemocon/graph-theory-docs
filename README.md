@@ -8,6 +8,8 @@ build alongside them. Every theorem is proved in the prose and *also* stated as 
 machine can try to refute — exhaustively on every graph up to six vertices, randomly on
 larger ones.
 
+**[Read it as a PDF](graph-theory-book.pdf)** — or in Dutch: **[het boek in het Nederlands](nl/README.md)**, [PDF](graph-theory-book-nl.pdf).
+
 **[Read it as a PDF](graph-theory-book.pdf)** — the whole book in one file, 147 pages, with a linked table of contents. Rebuild it with `python scripts/build_pdf.py` (needs `weasyprint markdown pygments`, which are deliberately not project dependencies).
 
 ## What makes this book different
